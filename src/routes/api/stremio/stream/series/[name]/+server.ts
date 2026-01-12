@@ -1,21 +1,11 @@
 import { getTorrentStreams } from '$lib/getTorrentStreams';
 import { isValidImdbId } from '$lib/imdb';
+import { json } from '$lib/requests';
 
 export async function GET({ params }) {
 	if (!isValidImdbId(params.name)) {
-		return new Response(JSON.stringify({ error: 'Invalid IMDB ID format' }), {
-			status: 400,
-			headers: {
-				'content-type': 'application/json',
-				'Access-Control-Allow-Origin': '*'
-			}
-		});
+		return json({ error: 'Invalid IMDB ID format' }, 400);
 	}
 	const streams = await getTorrentStreams(params.name);
-	return new Response(JSON.stringify({ streams }), {
-		headers: {
-			'content-type': 'application/json',
-			'Access-Control-Allow-Origin': '*'
-		}
-	});
+	return json({ streams });
 }
