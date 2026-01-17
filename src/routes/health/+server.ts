@@ -1,7 +1,7 @@
 import { json } from '$lib/requests';
 
-export async function GET({ platform }) {
-	const { services } = platform;
+export async function GET({ platform, event }) {
+	const { services } = event;
 	const healthChecks = await Promise.all([
 		services.torrent.healthCheck(),
 		services.google.healthCheck(),

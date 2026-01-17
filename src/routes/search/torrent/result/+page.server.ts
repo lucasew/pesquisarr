@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit"
 
-export async function load({url, platform}) {
+export async function load({url, platform, event}) {
     const parsedURL = new URL(url)
     const params = parsedURL.searchParams
     const use_google = params.get('use_google')
@@ -10,7 +10,7 @@ export async function load({url, platform}) {
     if (!query) {
         throw error(400, 'no query')
     }
-    const { services } = platform;
+    const { services } = event;
     const promises = []
     if (use_google) {
         promises.push(services.google.search(query))
