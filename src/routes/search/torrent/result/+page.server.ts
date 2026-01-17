@@ -1,8 +1,6 @@
-import { fetchTorrentsInLinks } from "$lib/fetchTorrentsInLinks"
-import { duckduckgo, google, yandex, type SearchResult } from "$lib/search"
 import { error } from "@sveltejs/kit"
 
-export async function load({url}) {
+export async function load({url, platform}) {
     const parsedURL = new URL(url)
     const params = parsedURL.searchParams
     const use_google = params.get('use_google')
@@ -12,22 +10,23 @@ export async function load({url}) {
     if (!query) {
         throw error(400, 'no query')
     }
+    const { services } = platform;
     const promises = []
     if (use_google) {
-        promises.push(google(query))
+        promises.push(services.google.search(query))
     }
     if (use_duckduckgo) {
-        promises.push(duckduckgo(query))
+        promises.push(services.duckduckgo.search(query))
     }
     if (use_yandex) {
-        promises.push(yandex(query))
+        promises.push(services.yandex.search(query))
     }
     // Gather search results with source tags
     const searchResults = (await Promise.all(promises)).flat();
     // For each search result, fetch torrents and tag with source
     const fetched = await Promise.all(
-        searchResults.map(async (r: SearchResult) => {
-            const mags = await fetchTorrentsInLinks([r.link]).catch(() => []);
+        searchResults.map(async (r) => {
+            const mags = await services.torrent.fetchTorrentsInLinks([r.link]).catch(() => []);
             return mags.map(m => ({ torrent: m, source: r.source }));
         })
     );
