@@ -7,10 +7,11 @@ export default class DuckDuckGoService extends BaseService {
 		const regex = /uddg=([^&"]*)/g;
 		try {
 			const response = await fetch(`${urlTemplate}${encodeURIComponent(query)}`, {
+				// @ts-ignore
 				cf: {
 					cacheTtl: 3600,
 					cacheEverything: true
-				} as any
+				}
 			});
 			const responseText = await response.text();
 			const urls = matchFirstGroup(responseText, regex);

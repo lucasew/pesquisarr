@@ -1,27 +1,21 @@
-// See https://kit.svelte.dev/docs/types#app
+export type Services = import('$lib/server/services').Services;
 
-import type { initializeServices } from "$lib/server/services";
-
-// for information about these interfaces
 declare global {
 	namespace App {
+		// interface Error {}
+		interface Locals {
+			services: Services;
+			[key: string]: unknown;
+		}
 		// interface PageData {}
+		// interface PageState {}
 		interface Platform {
-			env?: Record<string, unknown>;
-			context?: {
+			env: Record<string, unknown>;
+			context: {
 				waitUntil(promise: Promise<unknown>): void;
 			};
-			services?: Services;
+			caches: CacheStorage & { default: Cache };
 		}
-		interface RequestEvent {
-			services: ReturnType<typeof initializeServices>
-		}
-	}
-}
-
-declare module '@sveltejs/kit' {
-	interface RequestEvent {
-		services?: Services;
 	}
 }
 

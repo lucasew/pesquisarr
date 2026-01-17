@@ -14,10 +14,10 @@ export default class TorrentService extends BaseService {
 			this.services.search_duckduckgo.search(`${encodeURIComponent(title)} torrent`),
 			this.services.search_yandex.search(`${encodeURIComponent(title)} torrent`)
 		]);
-		const links = searchResults.flat().map((s) => s.link);
+		const links = searchResults.flat().map((s: any) => s.link);
 		const torrents = await this.fetchTorrentsInLinks(links);
-		return links
-			.map((link): TorrentStream | null => {
+		return torrents
+			.map((link: string): TorrentStream | null => {
 				let parsedURL;
 				try {
 					parsedURL = new URL(link);
@@ -59,10 +59,11 @@ export default class TorrentService extends BaseService {
 
 	private async fetchTorrentsInSite(link: string): Promise<string[]> {
 		const response = await fetch(link, {
+			// @ts-ignore
 			cf: {
 				cacheTtl: 7200,
 				cacheEverything: true
-			} as any
+			}
 		});
 		const responseText = await response.text();
 		const magnetLinks = responseText.match(/magnet:\?[^"']*/g) || [];
@@ -71,7 +72,7 @@ export default class TorrentService extends BaseService {
 
 	async healthCheck() {
 		try {
-			await this.services.google.search('test');
+			await this.services.search_google.search('test');
 			return { ok: true };
 		} catch {
 			return { ok: false, error: 'Search services unavailable' };

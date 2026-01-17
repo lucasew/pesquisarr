@@ -1,4 +1,3 @@
-
 import { htmlSanitize, matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
@@ -11,10 +10,11 @@ export default class ImdbService extends BaseService {
 		}
 		try {
 			const response = await fetch(`https://www.imdb.com/title/${imdbId}`, {
+				// @ts-ignore
 				cf: {
 					cacheTtl: 3600 * 24,
 					cacheEverything: true
-				} as any
+				}
 			});
 			const responseText = await response.text();
 			return htmlSanitize(matchFirstGroup(responseText, regexImdbMatchTitle)[0]);
@@ -32,5 +32,4 @@ export default class ImdbService extends BaseService {
 			return { ok: false, error: 'IMDB unavailable' };
 		}
 	}
-
 }

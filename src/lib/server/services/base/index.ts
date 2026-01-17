@@ -1,15 +1,14 @@
+import type { RequestEvent } from '@sveltejs/kit';
+
 export interface HealthCheckResult {
 	ok: boolean;
 	[key: string]: unknown;
 }
 
-import type { RequestEvent } from '@sveltejs/kit';
-import type { initializeServices } from '..';
-
 export default abstract class BaseService {
-	protected event?: RequestEvent;
+	protected event: RequestEvent;
 
-	constructor(event?: RequestEvent) {
+	constructor(event: RequestEvent) {
 		this.event = event;
 	}
 
@@ -17,7 +16,22 @@ export default abstract class BaseService {
 		return { ok: true };
 	}
 
-	protected get services(): ReturnType<typeof initializeServices> {
-		return this.event?.services
+	protected get services() {
+		if (!this.event.locals.services) {
+			throw new Error('Services not initialized in locals');
+		}
+		return this.event.locals.services;
+	}
+
+	protected get env() {
+		return this.event.platform?.env;
+	}
+
+	protected get platform() {
+		return this.event.platform;
+	}
+
+	protected get locals() {
+		return this.event.locals;
 	}
 }
