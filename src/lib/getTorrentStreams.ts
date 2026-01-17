@@ -13,7 +13,12 @@ export async function getTorrentStreams(imdbId: string): Promise<TorrentStream[]
 	const links = await fetchTorrentsInLinks(siteLinks);
 	return links
 		.map((link): TorrentStream | null => {
-			const parsedURL = new URL(link);
+			let parsedURL;
+			try {
+				parsedURL = new URL(link);
+			} catch {
+				return null;
+			}
 			let infoHash = parsedURL.searchParams.get('xt');
 			if (infoHash) {
 				infoHash = infoHash.replace('urn:', '').replace('btih:', '');
