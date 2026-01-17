@@ -18,11 +18,11 @@ export async function initializeServices(event: RequestEvent): Promise<Services>
 
 	// Initialize in dependency order if needed, but parallel is fine
 	const servicePromises = [
-		{ key: 'torrent', service: new TorrentService(event.platform!, event.locals, event) },
-		{ key: 'google', service: new GoogleService(event.platform!, event.locals, event) },
-		{ key: 'duckduckgo', service: new DuckDuckGoService(event.platform!, event.locals, event) },
-		{ key: 'yandex', service: new YandexService(event.platform!, event.locals, event) },
-		{ key: 'imdb', service: new ImdbService(event.platform!, event.locals, event) }
+		{ key: 'torrent', service: new TorrentService(event.platform!, event) },
+		{ key: 'google', service: new GoogleService(event.platform!, event) },
+		{ key: 'duckduckgo', service: new DuckDuckGoService(event.platform!, event) },
+		{ key: 'yandex', service: new YandexService(event.platform!, event) },
+		{ key: 'imdb', service: new ImdbService(event.platform!, event) }
 	];
 
 	await Promise.all(

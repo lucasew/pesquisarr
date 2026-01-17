@@ -7,12 +7,10 @@ import type { RequestEvent } from '@sveltejs/kit';
 
 export default abstract class BaseService {
 	protected platform: App.Platform;
-	protected locals?: App.Locals;
 	protected event?: RequestEvent;
 
-	constructor(platform: App.Platform, locals?: App.Locals, event?: RequestEvent) {
+	constructor(platform: App.Platform, event?: RequestEvent) {
 		this.platform = platform;
-		this.locals = locals;
 		this.event = event;
 	}
 

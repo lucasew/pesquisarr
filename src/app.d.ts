@@ -6,7 +6,6 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			services?: Services;
 			[key: string]: unknown;
 		}
 		// interface PageData {}
@@ -15,14 +14,13 @@ declare global {
 			context?: {
 				waitUntil(promise: Promise<unknown>): void;
 			};
-			services?: Services;
 		}
 	}
 }
 
 declare module '@sveltejs/kit' {
 	interface RequestEvent {
-		services?: Services;
+		services: Services;
 	}
 }
 
