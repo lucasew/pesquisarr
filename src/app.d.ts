@@ -1,14 +1,10 @@
-import type { Services } from '$lib/server/services';
-
 // See https://kit.svelte.dev/docs/types#app
+
+import type { initializeServices } from "$lib/server/services";
+
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
-		interface Locals {
-			services?: Services;
-			[key: string]: unknown;
-		}
 		// interface PageData {}
 		interface Platform {
 			env?: Record<string, unknown>;
@@ -16,6 +12,9 @@ declare global {
 				waitUntil(promise: Promise<unknown>): void;
 			};
 			services?: Services;
+		}
+		interface RequestEvent {
+			services: ReturnType<typeof initializeServices>
 		}
 	}
 }

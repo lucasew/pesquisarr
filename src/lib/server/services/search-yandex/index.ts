@@ -1,3 +1,5 @@
+import { isValidHttpUrl } from '$lib/url';
+import { matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
 export type SearchResult = { link: string; source: string };
@@ -14,10 +16,10 @@ export default class YandexService extends BaseService {
 				} as any
 			});
 			const responseText = await response.text();
-			const urls = this.matchFirstGroup(responseText, regex);
+			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
 			return decodedUrls
-				.filter(this.isValidHttpUrl)
+				.filter(isValidHttpUrl)
 				.map((url) => ({ link: url, source: 'Yandex' }));
 		} catch (e) {
 			console.error(e);
@@ -32,24 +34,5 @@ export default class YandexService extends BaseService {
 		} catch {
 			return { ok: false, error: 'Yandex search unavailable' };
 		}
-	}
-
-	private matchFirstGroup(text: string, regex: RegExp): string[] {
-		const matches = [];
-		let match;
-		while ((match = regex.exec(text)) !== null) {
-			matches.push(match[1]);
-		}
-		return matches;
-	}
-
-	private isValidHttpUrl(string: string): boolean {
-		let url;
-		try {
-			url = new URL(string);
-		} catch (_) {
-			return false;
-		}
-		return url.protocol === 'http:' || url.protocol === 'https:';
 	}
 }

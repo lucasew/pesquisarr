@@ -5,31 +5,13 @@ import DuckDuckGoService from './search-duckduckgo';
 import YandexService from './search-yandex';
 import ImdbService from './imdb';
 
-export type Services = {
-	torrent: TorrentService;
-	google: GoogleService;
-	duckduckgo: DuckDuckGoService;
-	yandex: YandexService;
-	imdb: ImdbService;
-};
-
-export async function initializeServices(event: RequestEvent): Promise<Services> {
-	const services = {} as Services;
-
-	// Initialize in dependency order if needed, but parallel is fine
-	const servicePromises = [
-		{ key: 'torrent', service: new TorrentService(event.platform!, event.locals, event) },
-		{ key: 'google', service: new GoogleService(event.platform!, event.locals, event) },
-		{ key: 'duckduckgo', service: new DuckDuckGoService(event.platform!, event.locals, event) },
-		{ key: 'yandex', service: new YandexService(event.platform!, event.locals, event) },
-		{ key: 'imdb', service: new ImdbService(event.platform!, event.locals, event) }
-	];
-
-	await Promise.all(
-		servicePromises.map(async ({ key, service }) => {
-			(services as any)[key] = service;
-		})
-	);
-
-	return services;
+export function initializeServices(event: RequestEvent) {
+	event.services = {
+		torrent: new TorrentService(event),
+		search_google: new GoogleService(event),
+		search_duckduckgo: new DuckDuckGoService(event),
+		search_yandex: new YandexService(event),
+		imdb: new ImdbService(event)
+	}
+	return event.services;
 }

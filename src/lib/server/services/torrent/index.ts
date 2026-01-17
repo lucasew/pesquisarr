@@ -10,9 +10,9 @@ export default class TorrentService extends BaseService {
 	async getStreams(imdbId: string): Promise<TorrentStream[]> {
 		const title = await this.services.imdb.getTitleById(imdbId);
 		const searchResults = await Promise.all([
-			this.services.google.search(`${encodeURIComponent(title)} torrent`),
-			this.services.duckduckgo.search(`${encodeURIComponent(title)} torrent`),
-			this.services.yandex.search(`${encodeURIComponent(title)} torrent`)
+			this.services.search_google.search(`${encodeURIComponent(title)} torrent`),
+			this.services.search_duckduckgo.search(`${encodeURIComponent(title)} torrent`),
+			this.services.search_yandex.search(`${encodeURIComponent(title)} torrent`)
 		]);
 		const links = searchResults.flat().map((s) => s.link);
 		const torrents = await this.fetchTorrentsInLinks(links);

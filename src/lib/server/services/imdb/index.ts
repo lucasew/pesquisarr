@@ -1,3 +1,5 @@
+
+import { htmlSanitize, matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
 export default class ImdbService extends BaseService {
@@ -15,10 +17,10 @@ export default class ImdbService extends BaseService {
 				} as any
 			});
 			const responseText = await response.text();
-			return this.htmlSanitize(this.matchFirstGroup(responseText, regexImdbMatchTitle)[0]);
+			return htmlSanitize(matchFirstGroup(responseText, regexImdbMatchTitle)[0]);
 		} catch (e) {
 			console.error(e);
-			return this.htmlSanitize(imdbId);
+			return htmlSanitize(imdbId);
 		}
 	}
 
@@ -31,16 +33,4 @@ export default class ImdbService extends BaseService {
 		}
 	}
 
-	private matchFirstGroup(text: string, regex: RegExp): string[] {
-		const matches = [];
-		let match;
-		while ((match = regex.exec(text)) !== null) {
-			matches.push(match[1]);
-		}
-		return matches;
-	}
-
-	private htmlSanitize(text: string): string {
-		return text.replace(/<[^>]*>/g, '').trim();
-	}
 }

@@ -1,9 +1,8 @@
+import { matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
-export type SearchResult = { link: string; source: string };
-
 export default class DuckDuckGoService extends BaseService {
-	async search(query: string): Promise<SearchResult[]> {
+	async search(query: string) {
 		const urlTemplate = 'https://duckduckgo.com/html?q=';
 		const regex = /uddg=([^&"]*)/g;
 		try {
@@ -14,7 +13,7 @@ export default class DuckDuckGoService extends BaseService {
 				} as any
 			});
 			const responseText = await response.text();
-			const urls = this.matchFirstGroup(responseText, regex);
+			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
 			return decodedUrls
 				.filter(this.isValidHttpUrl)
@@ -32,15 +31,6 @@ export default class DuckDuckGoService extends BaseService {
 		} catch {
 			return { ok: false, error: 'DuckDuckGo search unavailable' };
 		}
-	}
-
-	private matchFirstGroup(text: string, regex: RegExp): string[] {
-		const matches = [];
-		let match;
-		while ((match = regex.exec(text)) !== null) {
-			matches.push(match[1]);
-		}
-		return matches;
 	}
 
 	private isValidHttpUrl(string: string): boolean {
