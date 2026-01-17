@@ -18,9 +18,7 @@ export default class GoogleService extends BaseService {
 			const responseText = await response.text();
 			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
-			return decodedUrls
-				.filter(isValidHttpUrl)
-				.map((url) => ({ link: url, source: 'Google' }));
+			return decodedUrls.filter(isValidHttpUrl).map((url) => ({ link: url, source: 'Google' }));
 		} catch (e) {
 			console.error(e);
 			return [];
@@ -35,7 +33,4 @@ export default class GoogleService extends BaseService {
 			return { ok: false, error: 'Google search unavailable' };
 		}
 	}
-
-
-
 }

@@ -1,4 +1,3 @@
-
 import { htmlSanitize, matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
@@ -32,5 +31,4 @@ export default class ImdbService extends BaseService {
 			return { ok: false, error: 'IMDB unavailable' };
 		}
 	}
-
 }

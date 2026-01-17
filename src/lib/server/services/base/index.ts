@@ -4,7 +4,7 @@ export interface HealthCheckResult {
 }
 
 import type { RequestEvent } from '@sveltejs/kit';
-import type { initializeServices } from '..';
+import type { Services } from '..';
 
 export default abstract class BaseService {
 	protected event?: RequestEvent;
@@ -17,7 +17,7 @@ export default abstract class BaseService {
 		return { ok: true };
 	}
 
-	protected get services(): ReturnType<typeof initializeServices> {
-		return this.event?.services
+	protected get services(): Services | undefined {
+		return this.event?.services;
 	}
 }

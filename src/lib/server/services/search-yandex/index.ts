@@ -18,9 +18,7 @@ export default class YandexService extends BaseService {
 			const responseText = await response.text();
 			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
-			return decodedUrls
-				.filter(isValidHttpUrl)
-				.map((url) => ({ link: url, source: 'Yandex' }));
+			return decodedUrls.filter(isValidHttpUrl).map((url) => ({ link: url, source: 'Yandex' }));
 		} catch (e) {
 			console.error(e);
 			return [];

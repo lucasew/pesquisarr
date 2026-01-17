@@ -1,6 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 
-import type { initializeServices } from "$lib/server/services";
+import type { Services } from '$lib/server/services';
 
 // for information about these interfaces
 declare global {
@@ -14,14 +14,14 @@ declare global {
 			services?: Services;
 		}
 		interface RequestEvent {
-			services: ReturnType<typeof initializeServices>
+			services: Services;
 		}
 	}
 }
 
 declare module '@sveltejs/kit' {
 	interface RequestEvent {
-		services?: Services;
+		services: Services;
 	}
 }
 

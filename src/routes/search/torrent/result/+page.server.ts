@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit"
 
-export async function load({url, platform, event}) {
+export async function load({url, services}) {
     const parsedURL = new URL(url)
     const params = parsedURL.searchParams
     const use_google = params.get('use_google')
@@ -10,16 +10,15 @@ export async function load({url, platform, event}) {
     if (!query) {
         throw error(400, 'no query')
     }
-    const { services } = event;
     const promises = []
     if (use_google) {
-        promises.push(services.google.search(query))
+        promises.push(services.search_google.search(query))
     }
     if (use_duckduckgo) {
-        promises.push(services.duckduckgo.search(query))
+        promises.push(services.search_duckduckgo.search(query))
     }
     if (use_yandex) {
-        promises.push(services.yandex.search(query))
+        promises.push(services.search_yandex.search(query))
     }
     // Gather search results with source tags
     const searchResults = (await Promise.all(promises)).flat();
@@ -39,5 +38,3 @@ export async function load({url, platform, event}) {
     const links = Array.from(map.entries()).map(([torrent, source]) => ({ torrent, source }));
     return { links };
 }
-
-

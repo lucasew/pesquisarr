@@ -8,6 +8,7 @@ interface TorrentStream {
 
 export default class TorrentService extends BaseService {
 	async getStreams(imdbId: string): Promise<TorrentStream[]> {
+		if (!this.services) throw new Error('Services not initialized');
 		const title = await this.services.imdb.getTitleById(imdbId);
 		const searchResults = await Promise.all([
 			this.services.search_google.search(`${encodeURIComponent(title)} torrent`),
@@ -15,7 +16,6 @@ export default class TorrentService extends BaseService {
 			this.services.search_yandex.search(`${encodeURIComponent(title)} torrent`)
 		]);
 		const links = searchResults.flat().map((s) => s.link);
-		const torrents = await this.fetchTorrentsInLinks(links);
 		return links
 			.map((link): TorrentStream | null => {
 				let parsedURL;
@@ -71,7 +71,8 @@ export default class TorrentService extends BaseService {
 
 	async healthCheck() {
 		try {
-			await this.services.google.search('test');
+			if (!this.services) throw new Error('Services not initialized');
+			await this.services.search_google.search('test');
 			return { ok: true };
 		} catch {
 			return { ok: false, error: 'Search services unavailable' };
