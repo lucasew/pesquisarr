@@ -3,11 +3,17 @@ export interface HealthCheckResult {
 	[key: string]: unknown;
 }
 
+import type { RequestEvent } from '@sveltejs/kit';
+
 export default abstract class BaseService {
 	protected platform: App.Platform;
+	protected locals?: App.Locals;
+	protected event?: RequestEvent;
 
-	constructor(platform: App.Platform) {
+	constructor(platform: App.Platform, locals?: App.Locals, event?: RequestEvent) {
 		this.platform = platform;
+		this.locals = locals;
+		this.event = event;
 	}
 
 	async healthCheck(): Promise<HealthCheckResult> {
@@ -15,17 +21,17 @@ export default abstract class BaseService {
 	}
 
 	protected get services() {
-		if (!this.platform!.services) {
-			throw new Error('Services not initialized in platform');
+		if (!this.event?.services) {
+			throw new Error('Services not initialized in event');
 		}
-		return this.platform!.services;
+		return this.event.services;
 	}
 
 	protected get env() {
-		return this.platform!.env;
+		return this.platform?.env;
 	}
 
 	protected get context() {
-		return this.platform!.context;
+		return this.platform?.context;
 	}
 }

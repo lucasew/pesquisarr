@@ -1,3 +1,4 @@
+import type { RequestEvent } from '@sveltejs/kit';
 import TorrentService from './torrent';
 import GoogleService from './search-google';
 import DuckDuckGoService from './search-duckduckgo';
@@ -12,16 +13,16 @@ export type Services = {
 	imdb: ImdbService;
 };
 
-export async function initializeServices(platform: App.Platform): Promise<Services> {
+export async function initializeServices(event: RequestEvent): Promise<Services> {
 	const services = {} as Services;
 
 	// Initialize in dependency order if needed, but parallel is fine
 	const servicePromises = [
-		{ key: 'torrent', service: new TorrentService(platform) },
-		{ key: 'google', service: new GoogleService(platform) },
-		{ key: 'duckduckgo', service: new DuckDuckGoService(platform) },
-		{ key: 'yandex', service: new YandexService(platform) },
-		{ key: 'imdb', service: new ImdbService(platform) }
+		{ key: 'torrent', service: new TorrentService(event.platform!, event.locals, event) },
+		{ key: 'google', service: new GoogleService(event.platform!, event.locals, event) },
+		{ key: 'duckduckgo', service: new DuckDuckGoService(event.platform!, event.locals, event) },
+		{ key: 'yandex', service: new YandexService(event.platform!, event.locals, event) },
+		{ key: 'imdb', service: new ImdbService(event.platform!, event.locals, event) }
 	];
 
 	await Promise.all(
@@ -29,8 +30,6 @@ export async function initializeServices(platform: App.Platform): Promise<Servic
 			(services as any)[key] = service;
 		})
 	);
-
-	platform.services = services;
 
 	return services;
 }

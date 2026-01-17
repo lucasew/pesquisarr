@@ -3,7 +3,8 @@ import { initializeServices } from '$lib/server/services';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	await initializeServices(event.platform!);
+	const services = await initializeServices(event);
+	event.services = services;
 	return paraglideMiddleware(event.request, ({ request: localizedRequest, locale }) => {
 		event.request = localizedRequest;
 		return resolve(event, {
