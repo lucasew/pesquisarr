@@ -1,5 +1,6 @@
 import { fetchTorrentsInLinks } from '$lib/fetchTorrentsInLinks';
 import { getTitleFromIMDB } from '$lib/getTitleFromIMDB';
+import { htmlSanitize } from '$lib/htmlSanitize';
 import { combined } from '$lib/search';
 
 interface TorrentStream {
@@ -21,7 +22,7 @@ export async function getTorrentStreams(imdbId: string): Promise<TorrentStream[]
 			if (!infoHash || infoHash.length != 40) {
 				return null;
 			}
-			const title = parsedURL.searchParams.get('dn') || '(NO NAME)';
+			const title = htmlSanitize(parsedURL.searchParams.get('dn') || '(NO NAME)');
 			return { infoHash, title };
 		})
 		.filter((stream): stream is TorrentStream => stream !== null);

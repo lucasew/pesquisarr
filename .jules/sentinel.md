@@ -11,3 +11,7 @@
 **Vulnerability:** Inconsistent response generation in API endpoints. The `series` endpoint constructed JSON responses manually, while the `movie` endpoint used a centralized `json` helper. This inconsistency could lead to security misconfigurations, such as missing or incorrect `Access-Control-Allow-Origin` headers.
 **Learning:** Centralizing common functionality, especially for security-sensitive operations like response generation, is crucial for maintaining a consistent security posture. Manual implementations are prone to error and can easily diverge over time.
 **Prevention:** Always use centralized helper functions for common tasks like generating API responses. This ensures that security headers and other important settings are applied consistently across all endpoints.
+## 2026-01-17 - Sanitize Magnet Link Display Names
+**Vulnerability:** The `getTorrentStreams` function extracted the `dn` (display name) parameter from magnet links and returned it in the API response without sanitization. This created a potential Stored XSS vulnerability if the consumer (frontend or Stremio) rendered the title as HTML.
+**Learning:** Data from external sources, even seemingly harmless query parameters in magnet links, must be treated as untrusted. XSS payloads can be injected anywhere.
+**Prevention:** Always sanitize user-controllable data before returning it in an API response or rendering it, especially when dealing with data scraped from the wild.
