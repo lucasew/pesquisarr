@@ -81,7 +81,9 @@ describe('ScraperService', () => {
 	describe('getTorrentStreams', () => {
 		it('should orchestrate the full flow', async () => {
 			mockEvent.locals.services.imdb.getTitleById.mockResolvedValue('Movie Title');
-			mockEvent.locals.services.search.search.mockResolvedValue([{ link: 'https://site1.com' }]);
+			mockEvent.locals.services.search.search.mockResolvedValue([
+				{ link: 'https://site1.com', source: 'Google' }
+			]);
 
 			// Mock fetchTorrentsInSite inside the service
 			vi.spyOn(service, 'fetchTorrentsInSite').mockResolvedValue([
@@ -91,7 +93,10 @@ describe('ScraperService', () => {
 			const result = await service.getTorrentStreams('tt1234567');
 			expect(result).toHaveLength(1);
 			expect(result[0].infoHash).toBe('HASH1');
-			expect(service.fetchTorrentsInSite).toHaveBeenCalledWith('https://site1.com');
+			expect(service.fetchTorrentsInSite).toHaveBeenCalledWith(
+				'https://site1.com',
+				'https://www.google.com/'
+			);
 		});
 	});
 });
