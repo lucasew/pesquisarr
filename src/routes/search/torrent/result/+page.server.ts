@@ -4,9 +4,10 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({url, locals}) => {
     const parsedURL = new URL(url)
     const params = parsedURL.searchParams
-    const use_google = params.get('use_google')
-    const use_duckduckgo = params.get('use_duckduckgo')
-    const use_yandex = params.get('use_yandex')
+    const use_google = params.get('use_google') !== '0' && params.get('use_google') !== 'false';
+    const use_duckduckgo =
+        params.get('use_duckduckgo') !== '0' && params.get('use_duckduckgo') !== 'false';
+    const use_yandex = params.get('use_yandex') !== '0' && params.get('use_yandex') !== 'false';
     const query = params.get('query')
     if (!query) {
         throw error(400, 'no query')
