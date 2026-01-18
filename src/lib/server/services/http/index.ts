@@ -2,29 +2,31 @@ import BaseService from '../base';
 import config from './config.json';
 
 export default class HttpService extends BaseService {
-	private getRandomUserAgent(): string {
-		const agents = config.userAgents;
-		return agents[Math.floor(Math.random() * agents.length)];
-	}
+	private getStealthHeaders(
+		url: string,
+		extraHeaders: Record<string, string> = {}
+	): Record<string, string> {
+		const presets = config.presets;
+		const preset = presets[Math.floor(Math.random() * presets.length)];
 
-	private getStealthHeaders(url: string): Record<string, string> {
 		const headers: Record<string, string> = {
 			...config.defaultHeaders,
-			'User-Agent': this.getRandomUserAgent()
+			'User-Agent': preset.userAgent,
+			...(preset.headers as Record<string, string>)
 		};
 
 		try {
 			const urlObj = new URL(url);
-			headers['Host'] = urlObj.host;
-			// Referer usually points to the search engine or the site's own home if direct
-			if (url.includes('google.com')) {
-				headers['Sec-Fetch-Site'] = 'same-origin';
+			const referer = extraHeaders['Referer'];
+
+			if (referer) {
+				const refObj = new URL(referer);
+				headers['Sec-Fetch-Site'] = refObj.host === urlObj.host ? 'same-origin' : 'cross-site';
 			} else {
-				headers['Referer'] = `${urlObj.protocol}//${urlObj.host}/`;
-				headers['Sec-Fetch-Site'] = 'cross-site';
+				headers['Sec-Fetch-Site'] = 'none';
 			}
 		} catch {
-			// fallback if URL is invalid (unlikely here)
+			headers['Sec-Fetch-Site'] = 'none';
 		}
 
 		return headers;
@@ -36,7 +38,7 @@ export default class HttpService extends BaseService {
 		extraHeaders: Record<string, string> = {}
 	): Promise<Response> {
 		const headers = {
-			...this.getStealthHeaders(url),
+			...this.getStealthHeaders(url, extraHeaders),
 			...extraHeaders
 		};
 
