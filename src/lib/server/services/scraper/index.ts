@@ -60,7 +60,7 @@ export default class ScraperService extends BaseService {
 		const fetchedResults = await Promise.all(
 			topLinks.map(async (url, index) => {
 				// Add jitter to avoid simultaneous bursts
-				const delay = index * 100 + Math.random() * 500;
+				const delay = index * 20 + Math.random() * 100;
 				await new Promise((resolve) => setTimeout(resolve, delay));
 				const source = refererMap.get(url);
 				const referer = source ? sourceReferers[source] : undefined;
