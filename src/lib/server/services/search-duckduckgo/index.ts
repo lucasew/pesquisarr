@@ -1,4 +1,5 @@
 import { matchFirstGroup } from '$lib/utils';
+import { isValidHttpUrl } from '$lib/url';
 import BaseService from '../base';
 
 export default class DuckDuckGoService extends BaseService {
@@ -16,9 +17,7 @@ export default class DuckDuckGoService extends BaseService {
 			const responseText = await response.text();
 			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
-			return decodedUrls
-				.filter(this.services.crawler.isValidHttpUrl)
-				.map((url) => ({ link: url, source: 'DuckDuckGo' }));
+			return decodedUrls.filter(isValidHttpUrl).map((url) => ({ link: url, source: 'DuckDuckGo' }));
 		} catch (e) {
 			console.error(e);
 			return [];

@@ -1,47 +1,13 @@
 import BaseService from '../base';
-import he from 'he';
-import decodeBencode from './bencode_decode'
+import decodeBencode from './bencode_decode';
 
-interface TorrentStream {
+export interface TorrentStream {
 	infoHash: string;
 	title: string;
 }
 
 export default class TorrentService extends BaseService {
-	async fetchTorrentsInLinks(links: string[]): Promise<string[]> {
-		const sortedLinks = this.rankLinks(links);
-		const fetched = await Promise.all(
-			sortedLinks.map((t) => this.fetchTorrentsInSite(t).catch(() => []))
-		);
-		const fetchedProcessed = fetched
-			.flat()
-			.map((x) => he.decode(x))
-			.sort((t) => -t.indexOf('dn='));
-		return [...new Set(fetchedProcessed)];
-	}
-
-	rankLinks(links: string[]): string[] {
-		return links.sort((a, b) => {
-			const aScore = (a.includes('magnet') ? 10 : 0) + (a.includes('torrent') ? 5 : 0);
-			const bScore = (b.includes('magnet') ? 10 : 0) + (b.includes('torrent') ? 5 : 0);
-			return bScore - aScore;
-		});
-	}
-
-	private async fetchTorrentsInSite(link: string): Promise<string[]> {
-		const response = await fetch(link, {
-			// @ts-ignore
-			cf: {
-				cacheTtl: 7200,
-				cacheEverything: true
-			}
-		});
-		const responseText = await response.text();
-		const magnetLinks = responseText.match(/magnet:\?[^"']*/g) || [];
-		return magnetLinks;
-	}
-
-	async decodeTorrent(torrent: ArrayBuffer) {
+	async decodeTorrent(torrent: ArrayBuffer): Promise<TorrentStream> {
 		const unbencode = decodeBencode(torrent, null, null, 'utf8');
 		const { infohashFrom, infohashTo } = unbencode;
 		const bufSlice = torrent.slice(infohashFrom, infohashTo);
@@ -50,9 +16,45 @@ export default class TorrentService extends BaseService {
 			.map((b) => b.toString(16).padStart(2, '0'))
 			.join('')
 			.toUpperCase();
-		delete unbencode.infohashFrom;
-		delete unbencode.infohashTo;
-		unbencode['infohash'] = hexDigest;
-		return unbencode;
+
+		const title = unbencode.info?.name || 'Unknown Torrent';
+
+		return {
+			infoHash: hexDigest,
+			title
+		};
+	}
+
+	parseMagnet(link: string): TorrentStream | null {
+		try {
+			const parsedURL = new URL(link);
+			let infoHash = parsedURL.searchParams.get('xt');
+			if (infoHash) {
+				infoHash = infoHash.replace('urn:', '').replace('btih:', '');
+			}
+			if (!infoHash || (infoHash.length !== 40 && infoHash.length !== 32)) {
+				return null;
+			}
+			// If it's Base32 (32 chars), it should ideally be converted to Hex (40 chars)
+			// For now, let's keep it simple and ensure it's uppercase
+			infoHash = infoHash.toUpperCase();
+
+			const title = parsedURL.searchParams.get('dn') || '(NO NAME)';
+			return { infoHash, title };
+		} catch {
+			// Handle cases where magnet link is not a valid URL (some might be just magnet:?...)
+			if (link.startsWith('magnet:?')) {
+				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
+				const dnMatch = link.match(/dn=([^&]*)/i);
+				if (xtMatch) {
+					let infoHash = xtMatch[1].toUpperCase();
+					const title = dnMatch ? decodeURIComponent(dnMatch[1]) : '(NO NAME)';
+					if (infoHash.length === 40 || infoHash.length === 32) {
+						return { infoHash, title };
+					}
+				}
+			}
+			return null;
+		}
 	}
 }

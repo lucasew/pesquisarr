@@ -7,6 +7,6 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		return json({ error: 'Invalid IMDB ID format' }, 400);
 	}
 	const { services } = locals;
-	const streams = await services.torrent.getStreams(params.name);
+	const streams = await services.crawler.getTorrentStreams(params.name);
 	return json({ streams });
 };
