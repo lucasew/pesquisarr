@@ -1,5 +1,6 @@
 import BaseService from '../base';
 import he from 'he';
+import decodeBencode from './bencode_decode'
 
 interface TorrentStream {
 	infoHash: string;
@@ -7,36 +8,6 @@ interface TorrentStream {
 }
 
 export default class TorrentService extends BaseService {
-	async getStreams(imdbId: string): Promise<TorrentStream[]> {
-		const title = await this.services.imdb.getTitleById(imdbId);
-		const searchResults = await Promise.all([
-			this.services.search_google.search(`${encodeURIComponent(title)} torrent`),
-			this.services.search_duckduckgo.search(`${encodeURIComponent(title)} torrent`),
-			this.services.search_yandex.search(`${encodeURIComponent(title)} torrent`)
-		]);
-		const links = searchResults.flat().map((s: any) => s.link);
-		const torrents = await this.fetchTorrentsInLinks(links);
-		return torrents
-			.map((link: string): TorrentStream | null => {
-				let parsedURL;
-				try {
-					parsedURL = new URL(link);
-				} catch {
-					return null;
-				}
-				let infoHash = parsedURL.searchParams.get('xt');
-				if (infoHash) {
-					infoHash = infoHash.replace('urn:', '').replace('btih:', '');
-				}
-				if (!infoHash || infoHash.length != 40) {
-					return null;
-				}
-				const title = parsedURL.searchParams.get('dn') || '(NO NAME)';
-				return { infoHash, title };
-			})
-			.filter((stream): stream is TorrentStream => stream !== null);
-	}
-
 	async fetchTorrentsInLinks(links: string[]): Promise<string[]> {
 		const sortedLinks = this.rankLinks(links);
 		const fetched = await Promise.all(
@@ -49,7 +20,7 @@ export default class TorrentService extends BaseService {
 		return [...new Set(fetchedProcessed)];
 	}
 
-	private rankLinks(links: string[]): string[] {
+	rankLinks(links: string[]): string[] {
 		return links.sort((a, b) => {
 			const aScore = (a.includes('magnet') ? 10 : 0) + (a.includes('torrent') ? 5 : 0);
 			const bScore = (b.includes('magnet') ? 10 : 0) + (b.includes('torrent') ? 5 : 0);
@@ -70,12 +41,18 @@ export default class TorrentService extends BaseService {
 		return magnetLinks;
 	}
 
-	async healthCheck() {
-		try {
-			await this.services.search_google.search('test');
-			return { ok: true };
-		} catch {
-			return { ok: false, error: 'Search services unavailable' };
-		}
+	async decodeTorrent(torrent: ArrayBuffer) {
+		const unbencode = decodeBencode(torrent, null, null, 'utf8');
+		const { infohashFrom, infohashTo } = unbencode;
+		const bufSlice = torrent.slice(infohashFrom, infohashTo);
+		const digest = await crypto.subtle.digest({ name: 'SHA-1' }, bufSlice);
+		const hexDigest = [...new Uint8Array(digest)]
+			.map((b) => b.toString(16).padStart(2, '0'))
+			.join('')
+			.toUpperCase();
+		delete unbencode.infohashFrom;
+		delete unbencode.infohashTo;
+		unbencode['infohash'] = hexDigest;
+		return unbencode;
 	}
 }

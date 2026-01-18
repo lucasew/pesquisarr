@@ -1,7 +1,4 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getTorrentStreams } from './getTorrentStreams';
-import * as fetchTorrentsInLinksModule from './fetchTorrentsInLinks';
-import * as getTitleFromIMDBModule from './getTitleFromIMDB';
 import * as searchModule from './search';
 
 // Mock dependencies

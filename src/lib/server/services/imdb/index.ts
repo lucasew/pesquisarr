@@ -1,11 +1,15 @@
 import { htmlSanitize, matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
+
 export default class ImdbService extends BaseService {
+	REGEX_IMDB_MATCH_TITLE = /<title>(.*) - IMDb<\/title>/g;
+	REGEX_IMDB_ID = /^tt\d{7,12}$/;
+	
 	async getTitleById(imdbId: string): Promise<string> {
-		const regexImdbMatchTitle = /<title>(.*) - IMDb<\/title>/g;
-		const regexImdbId = /^tt\d{7,12}$/;
-		if (!regexImdbId.test(imdbId)) {
+		
+		
+		if (!this.REGEX_IMDB_ID.test(imdbId)) {
 			throw new Error(`invalid imdb id format for ${imdbId}`);
 		}
 		try {
@@ -17,7 +21,7 @@ export default class ImdbService extends BaseService {
 				}
 			});
 			const responseText = await response.text();
-			return htmlSanitize(matchFirstGroup(responseText, regexImdbMatchTitle)[0]);
+			return htmlSanitize(matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE)[0]);
 		} catch (e) {
 			console.error(e);
 			return htmlSanitize(imdbId);

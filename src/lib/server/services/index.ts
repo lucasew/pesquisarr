@@ -4,6 +4,8 @@ import DuckDuckGoService from './search-duckduckgo';
 import GoogleService from './search-google';
 import YandexService from './search-yandex';
 import ImdbService from './imdb';
+import SearchService from './search';
+import CrawlerService from './crawler';
 
 export function getServices(event: RequestEvent) {
 	return {
@@ -11,7 +13,9 @@ export function getServices(event: RequestEvent) {
 		search_duckduckgo: new DuckDuckGoService(event),
 		search_google: new GoogleService(event),
 		search_yandex: new YandexService(event),
+		search: new SearchService(event),
 		imdb: new ImdbService(event),
+		crawler: new CrawlerService(event)
 	}
 }
 

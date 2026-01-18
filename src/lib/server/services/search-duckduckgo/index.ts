@@ -17,7 +17,7 @@ export default class DuckDuckGoService extends BaseService {
 			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
 			return decodedUrls
-				.filter(this.isValidHttpUrl)
+				.filter(this.services.crawler.isValidHttpUrl)
 				.map((url) => ({ link: url, source: 'DuckDuckGo' }));
 		} catch (e) {
 			console.error(e);
@@ -32,15 +32,5 @@ export default class DuckDuckGoService extends BaseService {
 		} catch {
 			return { ok: false, error: 'DuckDuckGo search unavailable' };
 		}
-	}
-
-	private isValidHttpUrl(string: string): boolean {
-		let url;
-		try {
-			url = new URL(string);
-		} catch (_) {
-			return false;
-		}
-		return url.protocol === 'http:' || url.protocol === 'https:';
 	}
 }

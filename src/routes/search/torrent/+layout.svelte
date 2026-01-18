@@ -33,8 +33,8 @@
 	<ul>
 		<li><a href="/">Home</a></li>
 		<li>Search Torrent</li>
-		{#if url.searchParams.get('query')}
-			<li>{url.searchParams.get('query')}</li>
+		{#if $page.url.searchParams.get('query')}
+			<li>{$page.url.searchParams.get('query')}</li>
 		{/if}
 	</ul>
 </div>
