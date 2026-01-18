@@ -20,7 +20,7 @@ export default class HttpService extends BaseService {
 	async getHtml(url: string, ttl = 3600): Promise<string> {
 		const response = await this.fetch(url, ttl);
 		if (!response.ok) {
-			throw new Error(`Failed to fetch HTML from ${url}: ${response.statusText}`);
+			throw new Error(`Failed to fetch HTML: ${response.statusText}`);
 		}
 		return response.text();
 	}
@@ -28,7 +28,7 @@ export default class HttpService extends BaseService {
 	async getBuffer(url: string, ttl = 3600): Promise<ArrayBuffer> {
 		const response = await this.fetch(url, ttl);
 		if (!response.ok) {
-			throw new Error(`Failed to fetch Buffer from ${url}: ${response.statusText}`);
+			throw new Error(`Failed to fetch Buffer: ${response.statusText}`);
 		}
 		return response.arrayBuffer();
 	}
