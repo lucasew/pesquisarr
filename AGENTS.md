@@ -8,7 +8,6 @@
   - Os serviços são inicializados no `hooks.server.ts` e injetados em `event.locals.services`.
   - Cada serviço recebe o `event` (RequestEvent) completo no construtor.
   - Toda comunicação entre serviços deve ser feita via `this.services.<nome_do_serviço>` (disponível via getter no `BaseService`).
-  - **Lazy Loading:** Novos serviços devem ser adicionados ao `Promise.all` com `import()` dinâmico em `src/lib/server/services/index.ts` para otimizar o tempo de inicialização (cold start).
 - **Fetch & Cloudflare:**
   - Ao usar `fetch` com opções específicas da Cloudflare (ex: `cf: { cacheTtl: ... }`), use `// @ts-ignore` acima da propriedade `cf`. Isso mantém o código compatível com o SvelteKit padrão enquanto aproveita recursos da plataforma.
 - **Stremio Protocol:**
