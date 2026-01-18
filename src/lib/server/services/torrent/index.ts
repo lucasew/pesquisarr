@@ -7,22 +7,27 @@ export interface TorrentStream {
 }
 
 export default class TorrentService extends BaseService {
-	async decodeTorrent(torrent: ArrayBuffer): Promise<TorrentStream> {
-		const unbencode = decodeBencode(torrent, null, null, 'utf8');
-		const { infohashFrom, infohashTo } = unbencode;
-		const bufSlice = torrent.slice(infohashFrom, infohashTo);
-		const digest = await crypto.subtle.digest({ name: 'SHA-1' }, bufSlice);
-		const hexDigest = [...new Uint8Array(digest)]
-			.map((b) => b.toString(16).padStart(2, '0'))
-			.join('')
-			.toUpperCase();
+	async decodeTorrent(torrent: ArrayBuffer): Promise<TorrentStream | null> {
+		try {
+			const unbencode = decodeBencode(torrent, null, null, 'utf8');
+			const { infohashFrom, infohashTo } = unbencode;
+			const bufSlice = torrent.slice(infohashFrom, infohashTo);
+			const digest = await crypto.subtle.digest({ name: 'SHA-1' }, bufSlice);
+			const hexDigest = [...new Uint8Array(digest)]
+				.map((b) => b.toString(16).padStart(2, '0'))
+				.join('')
+				.toUpperCase();
 
-		const title = unbencode.info?.name || 'Unknown Torrent';
+			const title = unbencode.info?.name || 'Unknown Torrent';
 
-		return {
-			infoHash: hexDigest,
-			title
-		};
+			return {
+				infoHash: hexDigest,
+				title
+			};
+		} catch (e) {
+			console.error('Failed to decode torrent bencode', e);
+			return null;
+		}
 	}
 
 	parseMagnet(link: string): TorrentStream | null {

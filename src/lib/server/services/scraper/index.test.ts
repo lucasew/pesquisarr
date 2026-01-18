@@ -64,6 +64,18 @@ describe('ScraperService', () => {
 			expect(result).toHaveLength(1);
 			expect(result[0].infoHash).toBe('DECODED');
 		});
+
+		it('should skip if decodeTorrent fails', async () => {
+			mockEvent.locals.services.http.fetch.mockResolvedValue({
+				ok: true,
+				headers: new Map([['Content-Type', 'application/x-bittorrent']]),
+				arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
+			});
+			mockEvent.locals.services.torrent.decodeTorrent.mockResolvedValue(null);
+
+			const result = await service.fetchTorrentsInSite('https://example.com/bad.torrent');
+			expect(result).toHaveLength(0);
+		});
 	});
 
 	describe('getTorrentStreams', () => {

@@ -21,7 +21,7 @@ export default class ScraperService extends BaseService {
 			) {
 				const arrayBuffer = await response.arrayBuffer();
 				const stream = await this.services.torrent.decodeTorrent(arrayBuffer);
-				return [stream];
+				return stream ? [stream] : [];
 			} else if (contentType.includes('application/octet-stream')) {
 				return [];
 			} else {
