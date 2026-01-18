@@ -13,14 +13,12 @@ export function isValidHttpUrl(url: string): boolean {
 		}
 
 		// 2. Prevent requests to internal or reserved IP addresses
-		// For IPv6, hostname is bracketed (e.g., [::1]), so we strip them for regex matching.
 		const hostname = parsedUrl.hostname.replace(/[[\]]/g, '');
 
 		if (hostname.toLowerCase() === 'localhost' || hostname === '0' || hostname === '0.0.0.0') {
 			return false;
 		}
 
-		// List of regexes for private and reserved IP ranges.
 		const privateIpRegexes = [
 			/^127\./, // IPv4 loopback: 127.0.0.0/8
 			/^10\./, // IPv4 private Class A: 10.0.0.0/8
@@ -36,7 +34,6 @@ export function isValidHttpUrl(url: string): boolean {
 
 		return true;
 	} catch {
-		// URL parsing failed, so it's not a valid URL
 		return false;
 	}
 }

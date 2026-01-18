@@ -5,9 +5,15 @@
 
 	let url = $page.url;
 	let query = $page.url.searchParams.get('query');
-	let use_google = !!$page.url.searchParams.get('use_google');
-	let use_duckduckgo = !!$page.url.searchParams.get('use_duckduckgo');
-	let use_yandex = !!$page.url.searchParams.get('use_yandex');
+	let use_google =
+		$page.url.searchParams.get('use_google') !== '0' &&
+		$page.url.searchParams.get('use_google') !== 'false';
+	let use_duckduckgo =
+		$page.url.searchParams.get('use_duckduckgo') !== '0' &&
+		$page.url.searchParams.get('use_duckduckgo') !== 'false';
+	let use_yandex =
+		$page.url.searchParams.get('use_yandex') !== '0' &&
+		$page.url.searchParams.get('use_yandex') !== 'false';
 
 	function handleFormSubmit(e: SubmitEvent) {
 		e.preventDefault();
@@ -16,9 +22,9 @@
 			newURL.href += '/result';
 		}
 		newURL.searchParams.set('query', String(query));
-		if (use_google) newURL.searchParams.set('use_google', '1');
-		if (use_duckduckgo) newURL.searchParams.set('use_duckduckgo', '1');
-		if (use_yandex) newURL.searchParams.set('use_yandex', '1');
+		newURL.searchParams.set('use_google', use_google ? '1' : '0');
+		newURL.searchParams.set('use_duckduckgo', use_duckduckgo ? '1' : '0');
+		newURL.searchParams.set('use_yandex', use_yandex ? '1' : '0');
 		goto(newURL);
 	}
 </script>
@@ -27,8 +33,8 @@
 	<ul>
 		<li><a href="/">Home</a></li>
 		<li>Search Torrent</li>
-		{#if url.searchParams.get('query')}
-			<li>{url.searchParams.get('query')}</li>
+		{#if $page.url.searchParams.get('query')}
+			<li>{$page.url.searchParams.get('query')}</li>
 		{/if}
 	</ul>
 </div>

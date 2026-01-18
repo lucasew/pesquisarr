@@ -1,11 +1,11 @@
-import { getTorrentStreams } from '$lib/getTorrentStreams';
-import { isValidImdbId } from '$lib/imdb';
 import { json } from '$lib/requests';
+import type { RequestHandler } from './$types';
 
-export async function GET({ params }) {
-	if (!isValidImdbId(params.name)) {
+export const GET: RequestHandler = async ({ params, locals }) => {
+	const { services } = locals;
+	if (!services.imdb.isValidId(params.name)) {
 		return json({ error: 'Invalid IMDB ID format' }, 400);
 	}
-	const streams = await getTorrentStreams(params.name);
+	const streams = await services.scraper.getTorrentStreams(params.name);
 	return json({ streams });
-}
+};

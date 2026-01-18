@@ -4,7 +4,6 @@
 	export let source: string;
 
 	const torrentURL = new URL(torrent);
-	console.log(torrentURL);
 </script>
 
 <div class="card bg-base-100 shadow-xl mb-3">
