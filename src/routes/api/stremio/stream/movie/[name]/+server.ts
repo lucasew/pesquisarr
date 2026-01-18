@@ -1,11 +1,12 @@
 import { isValidImdbId } from '$lib/imdb';
 import { json } from '$lib/requests';
+import type { RequestHandler } from './$types';
 
-export async function GET({ params, platform, event }) {
+export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!isValidImdbId(params.name)) {
 		return json({ error: 'Invalid IMDB ID format' }, 400);
 	}
-	const { services } = event;
+	const { services } = locals;
 	const streams = await services.torrent.getStreams(params.name);
 	return json({ streams });
-}
+};
