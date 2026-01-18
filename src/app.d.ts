@@ -1,10 +1,10 @@
-export type Services = import('$lib/server/services').Services;
+import type { getServices } from "$lib/server/services";
 
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			services: Services;
+			services: ReturnType<typeof getServices>;
 			[key: string]: unknown;
 		}
 		// interface PageData {}
