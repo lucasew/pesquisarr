@@ -7,12 +7,16 @@ export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
 export const REGEX_MATCH_INFOHASH = /[0-9A-F]{40}/i;
 
 export default class ScraperService extends BaseService {
-	async fetchTorrentsInSite(url: string): Promise<TorrentStream[]> {
+	async fetchTorrentsInSite(url: string, referer?: string): Promise<TorrentStream[]> {
 		if (!isValidHttpUrl(url)) {
 			return [];
 		}
 		try {
-			const response = await this.services.http.fetch(url, 2 * 3600);
+			const extraHeaders: Record<string, string> = {};
+			if (referer) {
+				extraHeaders['Referer'] = referer;
+			}
+			const response = await this.services.http.fetch(url, 2 * 3600, extraHeaders);
 			const contentType = response.headers.get('Content-Type') || '';
 			if (
 				contentType.includes('application/x-bittorrent') ||
@@ -41,12 +45,28 @@ export default class ScraperService extends BaseService {
 		const title = await this.services.imdb.getTitleById(imdbId);
 		const searchResults = await this.services.search.search(`${title} torrent`);
 
+		const refererMap = new Map(searchResults.map((r) => [r.link, r.source]));
 		const rankedLinks = this.services.rank.rank(searchResults.map((l) => l.link));
 
 		// Use a limited number of links to avoid hitting limits or taking too long
 		const topLinks = rankedLinks.slice(0, 10);
 
-		const fetchedResults = await Promise.all(topLinks.map((url) => this.fetchTorrentsInSite(url)));
+		const sourceReferers: Record<string, string> = {
+			Google: 'https://www.google.com/',
+			DuckDuckGo: 'https://duckduckgo.com/',
+			Yandex: 'https://yandex.com/'
+		};
+
+		const fetchedResults = await Promise.all(
+			topLinks.map(async (url, index) => {
+				// Add jitter to avoid simultaneous bursts
+				const delay = index * 100 + Math.random() * 500;
+				await new Promise((resolve) => setTimeout(resolve, delay));
+				const source = refererMap.get(url);
+				const referer = source ? sourceReferers[source] : undefined;
+				return this.fetchTorrentsInSite(url, referer);
+			})
+		);
 
 		const allStreams = fetchedResults.flat();
 

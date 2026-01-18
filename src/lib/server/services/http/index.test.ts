@@ -20,7 +20,9 @@ describe('HttpService', () => {
 			'https://example.com',
 			expect.objectContaining({
 				headers: expect.objectContaining({
-					'User-Agent': expect.any(String)
+					'User-Agent': expect.any(String),
+					Accept: expect.any(String),
+					'Sec-Fetch-Dest': 'document'
 				}),
 				cf: expect.objectContaining({
 					cacheTtl: expect.any(Number)
