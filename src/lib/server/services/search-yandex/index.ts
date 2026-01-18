@@ -9,14 +9,10 @@ export default class YandexService extends BaseService {
 		const urlTemplate = 'https://yandex.com/search/?text=';
 		const regex = /href="(.*?)"/g;
 		try {
-			const response = await fetch(`${urlTemplate}${encodeURIComponent(query)}`, {
-				// @ts-ignore
-				cf: {
-					cacheTtl: 3600,
-					cacheEverything: true
-				}
-			});
-			const responseText = await response.text();
+			const responseText = await this.services.http.getHtml(
+				`${urlTemplate}${encodeURIComponent(query)}`,
+				3600
+			);
 			const urls = matchFirstGroup(responseText, regex);
 			const decodedUrls = [...new Set(urls)].map((url) => decodeURIComponent(url));
 			return decodedUrls.filter(isValidHttpUrl).map((url) => ({ link: url, source: 'Yandex' }));

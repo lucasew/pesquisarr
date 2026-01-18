@@ -15,14 +15,10 @@ export default class ImdbService extends BaseService {
 			throw new Error(`invalid imdb id format for ${imdbId}`);
 		}
 		try {
-			const response = await fetch(`https://www.imdb.com/title/${imdbId}`, {
-				// @ts-ignore
-				cf: {
-					cacheTtl: 3600 * 24,
-					cacheEverything: true
-				}
-			});
-			const responseText = await response.text();
+			const responseText = await this.services.http.getHtml(
+				`https://www.imdb.com/title/${imdbId}`,
+				3600 * 24
+			);
 			return htmlSanitize(matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE)[0]);
 		} catch (e) {
 			console.error(e);

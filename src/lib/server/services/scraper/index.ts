@@ -6,19 +6,13 @@ import { isValidHttpUrl } from '$lib/url';
 export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
 export const REGEX_MATCH_INFOHASH = /[0-9A-F]{40}/i;
 
-export default class CrawlerService extends BaseService {
+export default class ScraperService extends BaseService {
 	async fetchTorrentsInSite(url: string): Promise<TorrentStream[]> {
 		if (!isValidHttpUrl(url)) {
 			return [];
 		}
 		try {
-			const response = await fetch(url, {
-				// @ts-ignore
-				cf: {
-					cacheTtl: 2 * 3600,
-					cacheEverything: true
-				}
-			});
+			const response = await this.services.http.fetch(url, 2 * 3600);
 			const contentType = response.headers.get('Content-Type') || '';
 			if (
 				contentType.includes('application/x-bittorrent') ||
