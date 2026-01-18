@@ -6,6 +6,7 @@ import YandexService from './search-yandex';
 import ImdbService from './imdb';
 import SearchService from './search';
 import CrawlerService from './crawler';
+import RankService from './rank';
 
 export function getServices(event: RequestEvent) {
 	return {
@@ -15,14 +16,14 @@ export function getServices(event: RequestEvent) {
 		search_yandex: new YandexService(event),
 		search: new SearchService(event),
 		imdb: new ImdbService(event),
-		crawler: new CrawlerService(event)
-	}
+		crawler: new CrawlerService(event),
+		rank: new RankService(event)
+	};
 }
 
 export function initializeServices(event: RequestEvent) {
 	if (!event.locals.services) {
-		event.locals.services = getServices(event)
+		event.locals.services = getServices(event);
 	}
-	return event.locals.services
+	return event.locals.services;
 }
-

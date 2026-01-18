@@ -1,7 +1,6 @@
 import { matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 import type { TorrentStream } from '../torrent';
-import { rankLinks } from '$lib/rankLinks';
 import { isValidHttpUrl } from '$lib/url';
 
 export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
@@ -48,7 +47,7 @@ export default class CrawlerService extends BaseService {
 		const title = await this.services.imdb.getTitleById(imdbId);
 		const searchResults = await this.services.search.search(`${title} torrent`);
 
-		const rankedLinks = rankLinks(searchResults.map((l) => l.link));
+		const rankedLinks = this.services.rank.rank(searchResults.map((l) => l.link));
 
 		// Use a limited number of links to avoid hitting limits or taking too long
 		const topLinks = rankedLinks.slice(0, 10);
