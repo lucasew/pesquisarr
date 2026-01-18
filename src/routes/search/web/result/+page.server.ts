@@ -12,18 +12,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	if (!query) {
 		error(400, 'no query');
 	}
+
+    const selectedEngines: string[] = [];
+    if (use_google) selectedEngines.push('google');
+    if (use_duckduckgo) selectedEngines.push('duckduckgo');
+    if (use_yandex) selectedEngines.push('yandex');
+
 	const { services } = locals;
-	const promises = [];
-	if (use_google) {
-		promises.push(services.search_google.search(query));
-	}
-	if (use_duckduckgo) {
-		promises.push(services.search_duckduckgo.search(query));
-	}
-	if (use_yandex) {
-		promises.push(services.search_yandex.search(query));
-	}
-	const links = (await Promise.all(promises)).flat();
+	const links = await services.search.search(query, selectedEngines);
+
 	const rankedLinks = services.rank
 		.rank(links.map((l) => l.link))
 		.map((link) => links.find((l) => l.link === link))
@@ -34,4 +31,3 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		rankedLinks
 	};
 };
-
