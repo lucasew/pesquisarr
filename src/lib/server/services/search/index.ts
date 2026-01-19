@@ -6,16 +6,17 @@ export default class SearchService extends BaseService {
 		query: string,
 		engines: string[] = ['google', 'duckduckgo', 'yandex']
 	): Promise<SearchResult[]> {
+		const searchTerms = query.toLowerCase().includes('torrent') ? query : `${query} torrent`;
 		const promises = [];
 
 		if (engines.includes('google')) {
-			promises.push(this.services.search_google.search(query));
+			promises.push(this.services.search_google.search(searchTerms));
 		}
 		if (engines.includes('duckduckgo')) {
-			promises.push(this.services.search_duckduckgo.search(query));
+			promises.push(this.services.search_duckduckgo.search(searchTerms));
 		}
 		if (engines.includes('yandex')) {
-			promises.push(this.services.search_yandex.search(query));
+			promises.push(this.services.search_yandex.search(searchTerms));
 		}
 
 		const results = await Promise.all(promises);
