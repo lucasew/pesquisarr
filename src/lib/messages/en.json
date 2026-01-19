@@ -1,10 +1,3 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"home_header_title": "Home",
-	"home_header_welcome": "Welcome!",
-	"home_header_description": "Pesquisarr is a simple tool to help you find torrents without distractions.",
-	"home_header_scammy_sites_description": "There are many scammy sites that promise what they don't deliver. This tool focuses on what matters.",
-	"home_header_skip_sites_description": "We skip irrelevant sites so you get the best content.",
-	"home_header_pure_gold_description": "What you get is pure gold.",
-	"home_header_cloudflare_limits_description": "It may not show many results due to <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">platform limitations</a>."
+	"$schema": "https://inlang.com/schema/inlang-message-format"
 }

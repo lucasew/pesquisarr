@@ -1,10 +1,3 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"home_header_title": "Inicio",
-	"home_header_welcome": "¡Bienvenido!",
-	"home_header_description": "Pesquisarr es una herramienta sencilla para ayudarte a encontrar torrents sin distracciones.",
-	"home_header_scammy_sites_description": "Hay muchos sitios fraudulentos que prometen lo que no entregan. Esta herramienta se centra en lo que importa.",
-	"home_header_skip_sites_description": "Saltamos los sitios irrelevantes para que obtengas el mejor contenido.",
-	"home_header_pure_gold_description": "Lo que obtienes es oro puro.",
-	"home_header_cloudflare_limits_description": "Puede que no muestre muchos resultados debido a las <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">limitaciones de la plataforma</a>."
+	"$schema": "https://inlang.com/schema/inlang-message-format"
 }
