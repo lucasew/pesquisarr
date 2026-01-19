@@ -14,12 +14,7 @@
 		}
 	}
 
-	$: {
-		const q = $page.url.searchParams.get('query');
-		if (q !== null) {
-			query = q;
-		}
-	}
+	$: query = $page.url.searchParams.get('query') || '';
 </script>
 
 <div class="flex flex-col gap-4">

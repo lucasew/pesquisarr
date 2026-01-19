@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Search } from 'lucide-svelte';
+	import type { PageData } from './$types';
 
-	export let data;
+	export let data: PageData;
 
 	let query = '';
-	const suggestion = data.suggestion;
+	$: suggestion = data.suggestion;
 
 	function handleSearch() {
 		if (query.trim()) {

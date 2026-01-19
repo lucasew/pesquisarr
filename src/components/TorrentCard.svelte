@@ -26,14 +26,16 @@
 			<div>
 				<h3 class="text-xs uppercase tracking-wider font-bold mb-1">Trackers</h3>
 				<ul class="list-none text-sm">
-					{#each torrentURL.searchParams.getAll('tr')?.slice(0, 3) || [] as tracker (tracker)}
-						<li class="truncate">{tracker}</li>
+					{#each [torrentURL.searchParams.getAll('tr')] as trackers}
+						{#each trackers.slice(0, 3) as tracker (tracker)}
+							<li class="truncate">{tracker}</li>
+						{/each}
+						{#if trackers.length > 3}
+							<li class="text-xs italic">
+								... e mais {trackers.length - 3}
+							</li>
+						{/if}
 					{/each}
-					{#if (torrentURL.searchParams.getAll('tr')?.length || 0) > 3}
-						<li class="text-xs italic">
-							... e mais {torrentURL.searchParams.getAll('tr').length - 3}
-						</li>
-					{/if}
 				</ul>
 			</div>
 
