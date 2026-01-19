@@ -12,7 +12,7 @@
 <div class="space-y-4">
 	{#if links && links.length > 0}
 		{#each links as item (item.torrent)}
-			<TorrentCard torrent={item.torrent} source={item.source} />
+			<TorrentCard torrent={item.torrent} />
 		{/each}
 	{:else if data.query}
 		<div class="text-center py-10">

@@ -1,7 +1,5 @@
 <script lang="ts">
-	import SourceBadge from './SourceBadge.svelte';
 	export let torrent: string;
-	export let source: string;
 
 	const torrentURL = new URL(torrent);
 </script>
@@ -9,7 +7,6 @@
 <div class="card bg-base-100 shadow-xl mb-3">
 	<div class="card-body">
 		<div class="flex items-center gap-2 mb-2">
-			<SourceBadge {source} />
 			<h2 class="card-title">{torrentURL.searchParams.get('dn') || '(NO NAME)'}</h2>
 		</div>
 

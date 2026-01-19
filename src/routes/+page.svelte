@@ -2,7 +2,10 @@
 	import { goto } from '$app/navigation';
 	import { Search } from 'lucide-svelte';
 
+	export let data;
+
 	let query = '';
+	const suggestion = data.suggestion;
 
 	function handleSearch() {
 		if (query.trim()) {
@@ -20,12 +23,7 @@
 				class="input input-ghost flex items-center gap-2 flex-1 join-item h-16 text-lg focus-within:outline-none border-none"
 			>
 				<Search size={24} class="opacity-70 text-primary" />
-				<input
-					type="text"
-					class="grow"
-					placeholder="O que você quer baixar hoje?"
-					bind:value={query}
-				/>
+				<input type="text" class="grow" placeholder={suggestion} bind:value={query} />
 			</label>
 			<button type="submit" class="btn btn-primary join-item h-16 px-10 text-lg border-none"
 				>Buscar</button
