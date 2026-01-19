@@ -1,3 +1,4 @@
+import he from 'he';
 import BaseService from '../base';
 import decodeBencode from './bencode_decode';
 
@@ -18,7 +19,7 @@ export default class TorrentService extends BaseService {
 				.join('')
 				.toUpperCase();
 
-			const title = unbencode.info?.name || 'Unknown Torrent';
+			const title = he.encode(unbencode.info?.name || 'Unknown Torrent');
 
 			return {
 				infoHash: hexDigest,
@@ -44,7 +45,7 @@ export default class TorrentService extends BaseService {
 			// For now, let's keep it simple and ensure it's uppercase
 			infoHash = infoHash.toUpperCase();
 
-			const title = parsedURL.searchParams.get('dn') || '(NO NAME)';
+			const title = he.encode(parsedURL.searchParams.get('dn') || '(NO NAME)');
 			return { infoHash, title };
 		} catch {
 			// Handle cases where magnet link is not a valid URL (some might be just magnet:?...)
@@ -53,7 +54,7 @@ export default class TorrentService extends BaseService {
 				const dnMatch = link.match(/dn=([^&]*)/i);
 				if (xtMatch) {
 					let infoHash = xtMatch[1].toUpperCase();
-					const title = dnMatch ? decodeURIComponent(dnMatch[1]) : '(NO NAME)';
+					const title = dnMatch ? he.encode(decodeURIComponent(dnMatch[1])) : '(NO NAME)';
 					if (infoHash.length === 40 || infoHash.length === 32) {
 						return { infoHash, title };
 					}
