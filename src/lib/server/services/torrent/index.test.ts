@@ -30,4 +30,28 @@ describe('TorrentService', () => {
 			expect(result?.title).toBe('(NO NAME)');
 		});
 	});
+
+	describe('createMagnet', () => {
+		it('should create a valid magnet link', () => {
+			const stream = {
+				infoHash: '5D41402ABC4B2A76B9719D911017C5924068B73C',
+				title: 'test-torrent'
+			};
+			const magnet = service.createMagnet(stream);
+			expect(magnet).toBe(
+				'magnet:?xt=urn:btih:5D41402ABC4B2A76B9719D911017C5924068B73C&dn=test-torrent'
+			);
+		});
+
+		it('should encode special characters in title', () => {
+			const stream = {
+				infoHash: '5D41402ABC4B2A76B9719D911017C5924068B73C',
+				title: 'test torrent & more'
+			};
+			const magnet = service.createMagnet(stream);
+			expect(magnet).toBe(
+				'magnet:?xt=urn:btih:5D41402ABC4B2A76B9719D911017C5924068B73C&dn=test%20torrent%20%26%20more'
+			);
+		});
+	});
 });

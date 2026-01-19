@@ -52,7 +52,7 @@ export default class TorrentService extends BaseService {
 				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
 				const dnMatch = link.match(/dn=([^&]*)/i);
 				if (xtMatch) {
-					let infoHash = xtMatch[1].toUpperCase();
+					const infoHash = xtMatch[1].toUpperCase();
 					const title = dnMatch ? decodeURIComponent(dnMatch[1]) : '(NO NAME)';
 					if (infoHash.length === 40 || infoHash.length === 32) {
 						return { infoHash, title };
@@ -61,5 +61,13 @@ export default class TorrentService extends BaseService {
 			}
 			return null;
 		}
+	}
+
+	createMagnet(stream: TorrentStream): string {
+		let magnet = `magnet:?xt=urn:btih:${stream.infoHash}`;
+		if (stream.title) {
+			magnet += `&dn=${encodeURIComponent(stream.title)}`;
+		}
+		return magnet;
 	}
 }

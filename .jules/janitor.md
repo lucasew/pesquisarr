@@ -33,3 +33,9 @@
 **Root Cause:** A file was committed with formatting that did not adhere to the project's Prettier configuration. This is a common issue in projects without pre-commit hooks that enforce code style.
 **Solution:** I ran `prettier --write src/lib/url.ts` to automatically correct the formatting. I then verified the fix by running the linter again, which passed.
 **Pattern:** Always run the linter and formatter before committing code. Integrating these checks into a pre-commit hook is the best way to prevent this class of issue from ever reaching the main branch.
+
+## 2026-01-19 - Centralize Magnet Link Creation
+**Issue:** Magnet link construction was duplicated and coupled with route logic in `src/routes/search/torrent/result/+page.server.ts`. Search engine parameter parsing was also repetitive.
+**Root Cause:** Lack of a centralized method for creating magnet links and manual handling of multiple boolean parameters.
+**Solution:** Added `createMagnet` to `TorrentService` and refactored the route handler to use it. Simplified engine selection using a loop.
+**Pattern:** Move domain-specific string formatting (like magnet links) into the relevant service. Use loops for repetitive parameter extraction.

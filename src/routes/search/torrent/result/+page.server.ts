@@ -4,19 +4,15 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url, locals }) => {
 	const parsedURL = new URL(url);
 	const params = parsedURL.searchParams;
-	const use_google = params.get('use_google') !== '0' && params.get('use_google') !== 'false';
-	const use_duckduckgo =
-		params.get('use_duckduckgo') !== '0' && params.get('use_duckduckgo') !== 'false';
-	const use_yandex = params.get('use_yandex') !== '0' && params.get('use_yandex') !== 'false';
 	const query = params.get('query');
 	if (!query) {
 		throw error(400, 'no query');
 	}
 
-	const selectedEngines: string[] = [];
-	if (use_google) selectedEngines.push('google');
-	if (use_duckduckgo) selectedEngines.push('duckduckgo');
-	if (use_yandex) selectedEngines.push('yandex');
+	const selectedEngines = ['google', 'duckduckgo', 'yandex'].filter((engine) => {
+		const param = params.get(`use_${engine}`);
+		return param !== '0' && param !== 'false';
+	});
 
 	const { services } = locals;
 	// Gather search results with source tags
@@ -27,10 +23,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		searchResults.map(async (r) => {
 			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch(() => []);
 			return streams.map((s) => {
-				let magnet = `magnet:?xt=urn:btih:${s.infoHash}`;
-				if (s.title) {
-					magnet += `&dn=${encodeURIComponent(s.title)}`;
-				}
+				const magnet = services.torrent.createMagnet(s);
 				return { magnet, source: r.source };
 			});
 		})
