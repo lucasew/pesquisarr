@@ -1,8 +1,8 @@
-# cf-torrent
+# pesquisarr
 
 Simple cloudflare worker to search for the gold in torrent sites.
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/lucasew/cf-torrent)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/lucasew/pesquisarr)
 
 **WARNING**: This thing doesn't store any illegal data. All the data provided is already freely available on the Internet. This utility only makes it easier to search for it.
 

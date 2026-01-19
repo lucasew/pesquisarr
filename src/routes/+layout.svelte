@@ -40,7 +40,7 @@
 				</a>
 				<ThemeToggle />
 				<a
-					href="https://github.com/lucasew/cf-torrent"
+					href="https://github.com/lucasew/pesquisarr"
 					target="_blank"
 					class="btn btn-ghost btn-circle"
 					aria-label="GitHub"
