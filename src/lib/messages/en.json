@@ -2,9 +2,9 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"home_header_title": "Home",
 	"home_header_welcome": "Welcome!",
-	"home_header_description": "This is a simple Cloudflare Worker/Webapp to help people cut the bullshit when searching for torrents.",
-	"home_header_scammy_sites_description": "There are a lot of scammy sites that promise to give the gold but just directs users through a maze of link protectors and things like that. This app works by inspecting if the gold is already provided by the site. If not just skips and checks the next one.",
-	"home_header_skip_sites_description": "It already skips common sites that appear in the searches but are not relevant to the objective.",
-	"home_header_pure_gold_description": "What you get is mostly pure gold.",
-	"home_header_cloudflare_limits_description": "It may not show much results or may not find that much results because of <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">cloudflare workers subrequest limitations</a>."
+	"home_header_description": "Pesquisarr is a simple tool to help you find torrents without distractions.",
+	"home_header_scammy_sites_description": "There are many scammy sites that promise what they don't deliver. This tool focuses on what matters.",
+	"home_header_skip_sites_description": "We skip irrelevant sites so you get the best content.",
+	"home_header_pure_gold_description": "What you get is pure gold.",
+	"home_header_cloudflare_limits_description": "It may not show many results due to <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">platform limitations</a>."
 }

@@ -2,9 +2,9 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"home_header_title": "Inicio",
 	"home_header_welcome": "¡Bienvenido!",
-	"home_header_description": "Esta es una simple Cloudflare Worker/Webapp para ayudar a la gente a evitar las tonterías al buscar torrents.",
-	"home_header_scammy_sites_description": "Hay muchos sitios fraudulentos que prometen dar el oro pero solo dirigen a los usuarios a través de un laberinto de protectores de enlaces y cosas por el estilo. Esta aplicación funciona inspeccionando si el oro ya es proporcionado por el sitio. Si no, simplemente salta y comprueba el siguiente.",
-	"home_header_skip_sites_description": "Ya salta los sitios comunes que aparecen en las búsquedas pero que no son relevantes para el objetivo.",
-	"home_header_pure_gold_description": "Lo que obtienes es principalmente oro puro.",
-	"home_header_cloudflare_limits_description": "Puede que no muestre muchos resultados o que no encuentre tantos resultados debido a las <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">limitaciones de sub-solicitud de los workers de Cloudflare</a>."
+	"home_header_description": "Pesquisarr es una herramienta sencilla para ayudarte a encontrar torrents sin distracciones.",
+	"home_header_scammy_sites_description": "Hay muchos sitios fraudulentos que prometen lo que no entregan. Esta herramienta se centra en lo que importa.",
+	"home_header_skip_sites_description": "Saltamos los sitios irrelevantes para que obtengas el mejor contenido.",
+	"home_header_pure_gold_description": "Lo que obtienes es oro puro.",
+	"home_header_cloudflare_limits_description": "Puede que no muestre muchos resultados debido a las <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">limitaciones de la plataforma</a>."
 }
