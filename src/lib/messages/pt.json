@@ -1,10 +1,3 @@
 {
-	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"home_header_title": "Início",
-	"home_header_welcome": "Bem-vindo!",
-	"home_header_description": "Esta é uma simples Cloudflare Worker/Webapp para ajudar as pessoas a cortar o lixo ao procurar torrents.",
-	"home_header_scammy_sites_description": "Existem muitos sites fraudulentos que prometem dar o ouro, mas apenas direcionam os usuários através de um labirinto de protetores de link e coisas do tipo. Este aplicativo funciona inspecionando se o ouro já é fornecido pelo site. Se não, ele simplesmente pula e verifica o próximo.",
-	"home_header_skip_sites_description": "Ele já pula sites comuns que aparecem nas pesquisas, mas não são relevantes para o objetivo.",
-	"home_header_pure_gold_description": "O que você obtém é principalmente ouro puro.",
-	"home_header_cloudflare_limits_description": "Pode não mostrar muitos resultados ou não encontrar tantos resultados devido às <a target=\"_blank\" href=\"https://developers.cloudflare.com/workers/platform/limits/\" class=\"link link-primary\">limitações de sub-requisição dos workers da Cloudflare</a>."
+	"$schema": "https://inlang.com/schema/inlang-message-format"
 }

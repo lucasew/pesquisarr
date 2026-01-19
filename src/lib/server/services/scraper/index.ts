@@ -36,14 +36,14 @@ export default class ScraperService extends BaseService {
 					.filter((s): s is TorrentStream => s !== null);
 			}
 		} catch (e) {
-			console.error(`Error fetching torrents:`, e);
+			console.error(`Error fetching torrents from ${url}:`, e);
 			return [];
 		}
 	}
 
 	async getTorrentStreams(imdbId: string): Promise<TorrentStream[]> {
 		const title = await this.services.imdb.getTitleById(imdbId);
-		const searchResults = await this.services.search.search(`${title} torrent`);
+		const searchResults = await this.services.search.search(title);
 
 		const refererMap = new Map(searchResults.map((r) => [r.link, r.source]));
 		const rankedLinks = this.services.rank.rank(searchResults.map((l) => l.link));

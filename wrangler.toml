@@ -1,4 +1,4 @@
-name = "cf-torrent"
+name = "pesquisarr"
 main = ".svelte-kit/cloudflare/_worker.js"
 
 workers_dev = true

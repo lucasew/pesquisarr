@@ -8,6 +8,7 @@ import SearchService from './search';
 import ScraperService from './scraper';
 import RankService from './rank';
 import HttpService from './http';
+import SuggestionsService from './suggestions';
 
 export function getServices(event: RequestEvent) {
 	return {
@@ -19,7 +20,8 @@ export function getServices(event: RequestEvent) {
 		search: new SearchService(event),
 		imdb: new ImdbService(event),
 		scraper: new ScraperService(event),
-		rank: new RankService(event)
+		rank: new RankService(event),
+		suggestions: new SuggestionsService(event)
 	};
 }
 

@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { navigating } from '$app/stores';
-	import ForkMeBanner from '../components/ForkMeBanner.svelte';
 	import ThemeToggle from '../components/ThemeToggle.svelte';
+	import { Github, Play } from 'lucide-svelte';
 	import '../app.css';
 </script>
+
+<svelte:head>
+	<title>pesquisarr</title>
+</svelte:head>
 
 <!-- Progress bar at top when navigating -->
 {#if $navigating}
 	<progress
-		class="progress progress-primary w-full absolute top-0 left-0"
-		style="border-radius: 0; z-index: 9999;"
+		class="progress w-full absolute top-0 left-0 bg-transparent [&::-webkit-progress-value]:bg-base-content/50 [&::-moz-progress-bar]:bg-base-content/50"
+		style="border-radius: 0; z-index: 9999; height: 2px;"
 	></progress>
 {/if}
 
@@ -18,48 +22,33 @@
 		<!-- Navbar -->
 		<div class="navbar bg-base-100">
 			<div class="navbar-start gap-2">
-				<a href="/" class="btn btn-ghost text-xl font-bold">cf-torrent</a>
-				<ThemeToggle />
-				<!-- Mobile menu dropdown -->
-				<details class="dropdown lg:hidden">
-					<summary class="btn btn-ghost list-none">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-5 w-5"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M4 6h16M4 12h8m-8 6h16"
-							/>
-						</svg>
-					</summary>
-					<ul
-						class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-					>
-						<li><a href="/search/web">Search Web</a></li>
-						<li><a href="/search/torrent">Search Torrents</a></li>
-						<li><a href="/api/stremio/manifest.json" target="_blank">Stremio</a></li>
-					</ul>
-				</details>
+				<a href="/" class="btn btn-ghost p-1 h-12 w-12 min-h-0">
+					<img src="/logo.png" alt="logo" class="h-full object-contain" />
+				</a>
 			</div>
 			<div class="navbar-center hidden lg:flex">
-				<ul class="menu menu-horizontal px-1">
-					<li><a href="/search/web">Search Web</a></li>
-					<li><a href="/search/torrent">Search Torrents</a></li>
-					<li><a href="/api/stremio/manifest.json" target="_blank">Stremio</a></li>
-				</ul>
-			</div>
-			<div class="navbar-end">
 				<!-- Empty -->
 			</div>
+			<div class="navbar-end gap-2">
+				<a
+					href="/api/stremio/manifest.json"
+					target="_blank"
+					class="btn btn-ghost btn-circle"
+					aria-label="Stremio Manifest"
+				>
+					<Play size={24} />
+				</a>
+				<ThemeToggle />
+				<a
+					href="https://github.com/lucasew/pesquisarr"
+					target="_blank"
+					class="btn btn-ghost btn-circle"
+					aria-label="GitHub"
+				>
+					<Github size={24} />
+				</a>
+			</div>
 		</div>
-
-		<ForkMeBanner url="https://github.com/lucasew/cf-torrent" />
 
 		<div class="py-4 flex-1">
 			<slot />
