@@ -23,18 +23,20 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<div class="flex items-center gap-2 sticky top-0 bg-base-100 py-4 z-10">
-		<form on:submit|preventDefault={handleSearch} class="flex-1 flex gap-2">
+	<div class="sticky top-0 bg-base-100 py-4 z-10">
+		<form on:submit|preventDefault={handleSearch} class="w-full">
 			<div
-				class="join w-full shadow-sm rounded-full overflow-hidden border border-base-300 focus-within:border-primary transition-colors"
+				class="join w-full rounded-full overflow-hidden border border-base-content/10 focus-within:border-base-content/50 transition-all"
 			>
-				<label
-					class="input input-ghost flex items-center gap-2 flex-1 join-item focus-within:outline-none border-none"
-				>
-					<Search size={18} class="opacity-70 text-primary" />
-					<input type="text" class="grow" placeholder="Pesquisar torrents..." bind:value={query} />
-				</label>
-				<button type="submit" class="btn btn-primary join-item px-6 border-none">Buscar</button>
+				<input
+					type="text"
+					class="input input-ghost join-item flex-1 focus:outline-none"
+					placeholder="Pesquisar torrents..."
+					bind:value={query}
+				/>
+				<button type="submit" class="btn btn-ghost join-item px-6 border-none" aria-label="Buscar">
+					<Search size={18} />
+				</button>
 			</div>
 		</form>
 	</div>

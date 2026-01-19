@@ -17,17 +17,23 @@
 <div class="flex flex-col items-center justify-center min-h-[60vh] gap-8">
 	<img src="/logo.png" alt="pesquisarr" class="max-w-[300px] w-full" />
 
-	<form on:submit|preventDefault={handleSearch} class="w-full max-w-2xl flex flex-col gap-4">
-		<div class="join w-full shadow-lg rounded-full overflow-hidden border border-primary">
-			<label
-				class="input input-ghost flex items-center gap-2 flex-1 join-item h-16 text-lg focus-within:outline-none border-none"
+	<form on:submit|preventDefault={handleSearch} class="w-full max-w-2xl">
+		<div
+			class="join w-full rounded-full overflow-hidden border border-base-content/10 focus-within:border-base-content/50 transition-all"
+		>
+			<input
+				type="text"
+				class="input input-ghost join-item flex-1 h-16 text-lg focus:outline-none"
+				placeholder={suggestion}
+				bind:value={query}
+			/>
+			<button
+				type="submit"
+				class="btn btn-ghost join-item h-16 px-10 border-none"
+				aria-label="Buscar"
 			>
-				<Search size={24} class="opacity-70 text-primary" />
-				<input type="text" class="grow" placeholder={suggestion} bind:value={query} />
-			</label>
-			<button type="submit" class="btn btn-primary join-item h-16 px-10 text-lg border-none"
-				>Buscar</button
-			>
+				<Search size={24} />
+			</button>
 		</div>
 	</form>
 </div>

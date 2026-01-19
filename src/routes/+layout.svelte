@@ -12,8 +12,8 @@
 <!-- Progress bar at top when navigating -->
 {#if $navigating}
 	<progress
-		class="progress progress-primary w-full absolute top-0 left-0"
-		style="border-radius: 0; z-index: 9999;"
+		class="progress w-full absolute top-0 left-0 bg-transparent [&::-webkit-progress-value]:bg-base-content/50 [&::-moz-progress-bar]:bg-base-content/50"
+		style="border-radius: 0; z-index: 9999; height: 2px;"
 	></progress>
 {/if}
 
