@@ -13,3 +13,7 @@ package-lock.json
 yarn.lock
 src/lib/paraglide/
 .jules/
+
+project.inlang/.meta.json
+project.inlang/README.md
+src/app.d.ts
