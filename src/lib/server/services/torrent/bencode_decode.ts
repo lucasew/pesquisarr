@@ -1,3 +1,4 @@
+// @ts-nocheck
 // stolen from: https://raw.githubusercontent.com/Chocobo1/bencode_online/master/src/bencode/decode.js
 
 const INTEGER_START = 0x69; // 'i'

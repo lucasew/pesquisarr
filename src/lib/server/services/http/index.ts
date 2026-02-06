@@ -25,7 +25,8 @@ export default class HttpService extends BaseService {
 			} else {
 				headers['Sec-Fetch-Site'] = 'none';
 			}
-		} catch {
+		} catch (e) {
+			this.services.error.report(e, { context: 'HttpService.getStealthHeaders', url });
 			headers['Sec-Fetch-Site'] = 'none';
 		}
 
@@ -44,7 +45,7 @@ export default class HttpService extends BaseService {
 
 		return fetch(url, {
 			headers,
-			// @ts-ignore
+			// @ts-expect-error - Cloudflare specific options
 			cf: {
 				cacheTtl: ttl,
 				cacheEverything: true

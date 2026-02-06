@@ -21,7 +21,7 @@ export default class ImdbService extends BaseService {
 			);
 			return htmlSanitize(matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE)[0]);
 		} catch (e) {
-			console.error(e);
+			this.services.error.report(e, { context: 'ImdbService.getTitleById', imdbId });
 			return htmlSanitize(imdbId);
 		}
 	}
@@ -30,7 +30,8 @@ export default class ImdbService extends BaseService {
 		try {
 			const title = await this.getTitleById('tt0111161'); // Shawshank Redemption
 			return { ok: title !== 'tt0111161' };
-		} catch {
+		} catch (e) {
+			this.services.error.report(e, { context: 'ImdbService.healthCheck' });
 			return { ok: false, error: 'IMDB unavailable' };
 		}
 	}

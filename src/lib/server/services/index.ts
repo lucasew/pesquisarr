@@ -9,9 +9,11 @@ import ScraperService from './scraper';
 import RankService from './rank';
 import HttpService from './http';
 import SuggestionsService from './suggestions';
+import ErrorService from './error';
 
 export function getServices(event: RequestEvent) {
 	return {
+		error: new ErrorService(event),
 		http: new HttpService(event),
 		torrent: new TorrentService(event),
 		search_duckduckgo: new DuckDuckGoService(event),

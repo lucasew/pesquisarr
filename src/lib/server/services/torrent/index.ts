@@ -26,7 +26,7 @@ export default class TorrentService extends BaseService {
 				title
 			};
 		} catch (e) {
-			console.error('Failed to decode torrent bencode', e);
+			this.services.error.report(e, { context: 'TorrentService.decodeTorrent' });
 			return null;
 		}
 	}
@@ -47,19 +47,20 @@ export default class TorrentService extends BaseService {
 
 			const title = he.encode(parsedURL.searchParams.get('dn') || '(NO NAME)');
 			return { infoHash, title };
-		} catch {
+		} catch (e) {
 			// Handle cases where magnet link is not a valid URL (some might be just magnet:?...)
 			if (link.startsWith('magnet:?')) {
 				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
 				const dnMatch = link.match(/dn=([^&]*)/i);
 				if (xtMatch) {
-					let infoHash = xtMatch[1].toUpperCase();
+					const infoHash = xtMatch[1].toUpperCase();
 					const title = dnMatch ? he.encode(decodeURIComponent(dnMatch[1])) : '(NO NAME)';
 					if (infoHash.length === 40 || infoHash.length === 32) {
 						return { infoHash, title };
 					}
 				}
 			}
+			this.services.error.report(e, { context: 'TorrentService.parseMagnet', link });
 			return null;
 		}
 	}

@@ -12,7 +12,7 @@ export default class SearchService extends BaseService {
 		if (engines.includes('google')) {
 			promises.push(
 				this.services.search_google.search(searchTerms).catch((e) => {
-					console.error('Google search failed:', e);
+					this.services.error.report(e, { context: 'SearchService.search', engine: 'google' });
 					return [];
 				})
 			);
@@ -20,7 +20,10 @@ export default class SearchService extends BaseService {
 		if (engines.includes('duckduckgo')) {
 			promises.push(
 				this.services.search_duckduckgo.search(searchTerms).catch((e) => {
-					console.error('DuckDuckGo search failed:', e);
+					this.services.error.report(e, {
+						context: 'SearchService.search',
+						engine: 'duckduckgo'
+					});
 					return [];
 				})
 			);
@@ -28,7 +31,7 @@ export default class SearchService extends BaseService {
 		if (engines.includes('yandex')) {
 			promises.push(
 				this.services.search_yandex.search(searchTerms).catch((e) => {
-					console.error('Yandex search failed:', e);
+					this.services.error.report(e, { context: 'SearchService.search', engine: 'yandex' });
 					return [];
 				})
 			);
