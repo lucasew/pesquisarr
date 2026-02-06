@@ -1,3 +1,4 @@
+import { reportError } from '$lib/error';
 import { isValidHttpUrl } from '$lib/url';
 import { matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
@@ -21,7 +22,11 @@ export default abstract class SearchBaseService extends BaseService {
 				.filter(isValidHttpUrl)
 				.map((url) => ({ link: url, source: this.sourceName }));
 		} catch (e) {
-			console.error(`Search failed for ${this.sourceName}:`, e);
+			reportError(e, {
+				context: 'SearchBaseService.search',
+				source: this.sourceName,
+				query
+			});
 			return [];
 		}
 	}
@@ -30,7 +35,8 @@ export default abstract class SearchBaseService extends BaseService {
 		try {
 			const results = await this.search('test');
 			return { ok: results.length > 0 };
-		} catch {
+		} catch (e) {
+			reportError(e, { context: 'SearchBaseService.healthCheck', source: this.sourceName });
 			return { ok: false, error: `${this.sourceName} search unavailable` };
 		}
 	}

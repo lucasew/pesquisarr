@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { reportError } from '$lib/error';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -16,7 +16,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	// For each search result, fetch torrents and tag with source
 	const fetched = await Promise.all(
 		searchResults.map(async (r) => {
-			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch(() => []);
+			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch((e) => {
+				reportError(e, { context: 'PageServerLoad.fetchTorrentsInSite', link: r.link });
+				return [];
+			});
 			return streams.map((s) => {
 				let magnet = `magnet:?xt=urn:btih:${s.infoHash}`;
 				if (s.title) {
