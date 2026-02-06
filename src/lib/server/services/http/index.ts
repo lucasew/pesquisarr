@@ -1,4 +1,3 @@
-import { reportError } from '$lib/error';
 import BaseService from '../base';
 import config from './config.json';
 
@@ -27,7 +26,7 @@ export default class HttpService extends BaseService {
 				headers['Sec-Fetch-Site'] = 'none';
 			}
 		} catch (e) {
-			reportError(e, { context: 'HttpService.getStealthHeaders', url });
+			this.services.error.report(e, { context: 'HttpService.getStealthHeaders', url });
 			headers['Sec-Fetch-Site'] = 'none';
 		}
 

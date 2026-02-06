@@ -1,4 +1,3 @@
-import { reportError } from '$lib/error';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -17,7 +16,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const fetched = await Promise.all(
 		searchResults.map(async (r) => {
 			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch((e) => {
-				reportError(e, { context: 'PageServerLoad.fetchTorrentsInSite', link: r.link });
+				services.error.report(e, {
+					context: 'PageServerLoad.fetchTorrentsInSite',
+					link: r.link
+				});
 				return [];
 			});
 			return streams.map((s) => {

@@ -1,4 +1,3 @@
-import { reportError } from '$lib/error';
 import he from 'he';
 import BaseService from '../base';
 import decodeBencode from './bencode_decode';
@@ -27,7 +26,7 @@ export default class TorrentService extends BaseService {
 				title
 			};
 		} catch (e) {
-			reportError(e, { context: 'TorrentService.decodeTorrent' });
+			this.services.error.report(e, { context: 'TorrentService.decodeTorrent' });
 			return null;
 		}
 	}
@@ -61,7 +60,7 @@ export default class TorrentService extends BaseService {
 					}
 				}
 			}
-			reportError(e, { context: 'TorrentService.parseMagnet', link });
+			this.services.error.report(e, { context: 'TorrentService.parseMagnet', link });
 			return null;
 		}
 	}

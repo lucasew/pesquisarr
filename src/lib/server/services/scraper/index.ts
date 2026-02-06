@@ -1,4 +1,3 @@
-import { reportError } from '$lib/error';
 import { matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 import type { TorrentStream } from '../torrent';
@@ -37,7 +36,7 @@ export default class ScraperService extends BaseService {
 					.filter((s): s is TorrentStream => s !== null);
 			}
 		} catch (e) {
-			reportError(e, { context: 'ScraperService.fetchTorrentsInSite', url });
+			this.services.error.report(e, { context: 'ScraperService.fetchTorrentsInSite', url });
 			return [];
 		}
 	}

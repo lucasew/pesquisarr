@@ -11,7 +11,8 @@ export function matchFirstGroup(text: string, regex: RegExp): string[] {
 }
 
 const { window } = parseHTML('');
-const purify = DOMPurify(window as unknown as Window);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const purify = DOMPurify(window as any);
 
 export function htmlSanitize(str: string): string {
 	return purify.sanitize(str);

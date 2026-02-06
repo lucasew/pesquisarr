@@ -8,7 +8,7 @@ describe('HttpService', () => {
 	beforeEach(() => {
 		service = new HttpService(createMockEvent());
 		// Mock global fetch
-		global.fetch = vi.fn();
+		globalThis.fetch = vi.fn();
 	});
 
 	it('should call fetch with default headers', async () => {

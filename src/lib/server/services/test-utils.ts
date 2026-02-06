@@ -4,12 +4,16 @@ import { vi } from 'vitest';
 export function createMockEvent(): RequestEvent {
 	return {
 		locals: {
-			services: {}
+			services: {
+				error: {
+					report: vi.fn(),
+					healthCheck: vi.fn()
+				}
+			}
 		},
 		platform: {
 			env: {}
 		},
-		// @ts-expect-error - Partial mock
 		request: new Request('http://localhost'),
 		url: new URL('http://localhost'),
 		params: {},

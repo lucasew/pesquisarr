@@ -1,4 +1,3 @@
-import { reportError } from '$lib/error';
 import { htmlSanitize, matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
 
@@ -22,7 +21,7 @@ export default class ImdbService extends BaseService {
 			);
 			return htmlSanitize(matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE)[0]);
 		} catch (e) {
-			reportError(e, { context: 'ImdbService.getTitleById', imdbId });
+			this.services.error.report(e, { context: 'ImdbService.getTitleById', imdbId });
 			return htmlSanitize(imdbId);
 		}
 	}
@@ -32,7 +31,7 @@ export default class ImdbService extends BaseService {
 			const title = await this.getTitleById('tt0111161'); // Shawshank Redemption
 			return { ok: title !== 'tt0111161' };
 		} catch (e) {
-			reportError(e, { context: 'ImdbService.healthCheck' });
+			this.services.error.report(e, { context: 'ImdbService.healthCheck' });
 			return { ok: false, error: 'IMDB unavailable' };
 		}
 	}

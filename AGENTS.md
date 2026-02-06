@@ -23,7 +23,7 @@
 - **Healthcheck:** Cada serviço deve implementar seu próprio `healthCheck()` para validar integrações externas.
 - **Tratamento de Erros:**
   - **Nunca ignore erros:** Blocos `catch` vazios são proibidos.
-  - **Centralização:** Use `reportError` de `src/lib/error.ts` para relatar erros. Não use `console.error` diretamente.
+  - **Centralização:** Use `this.services.error.report()` para relatar erros. Não use `console.error` diretamente.
   - **Contexto:** Forneça contexto relevante ao relatar erros (ex: argumentos da função, IDs).
 
 ## Estrutura de Pastas

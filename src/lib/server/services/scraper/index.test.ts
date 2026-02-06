@@ -4,7 +4,8 @@ import { createMockEvent } from '../test-utils';
 
 describe('ScraperService', () => {
 	let service: ScraperService;
-	let mockEvent: ReturnType<typeof createMockEvent>;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let mockEvent: any;
 
 	beforeEach(() => {
 		mockEvent = createMockEvent();
