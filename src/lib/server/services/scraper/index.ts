@@ -36,7 +36,7 @@ export default class ScraperService extends BaseService {
 					.filter((s): s is TorrentStream => s !== null);
 			}
 		} catch (e) {
-			console.error(`Error fetching torrents from ${url}:`, e);
+			this.services.error.report(e, { context: 'ScraperService.fetchTorrentsInSite', url });
 			return [];
 		}
 	}

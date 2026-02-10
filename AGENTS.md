@@ -21,6 +21,10 @@
   - Evite `any`. Prefira `unknown` com validação ou tipos explícitos para resultados de busca e links de torrent.
 - **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 - **Healthcheck:** Cada serviço deve implementar seu próprio `healthCheck()` para validar integrações externas.
+- **Tratamento de Erros:**
+  - **Nunca ignore erros:** Blocos `catch` vazios são proibidos.
+  - **Centralização:** Use `this.services.error.report()` para relatar erros. Não use `console.error` diretamente.
+  - **Contexto:** Forneça contexto relevante ao relatar erros (ex: argumentos da função, IDs).
 
 ## Estrutura de Pastas
 
