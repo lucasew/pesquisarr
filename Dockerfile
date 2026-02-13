@@ -1,4 +1,4 @@
-FROM oven/bun:1@sha256:e90cdbaf9ccdb3d4bd693aa335c3310a6004286a880f62f79b18f9b1312a8ec3 AS builder
+FROM oven/bun:1@sha256:856da45d07aeb62eb38ea3e7f9e1794c0143a4ff63efb00e6c4491b627e2a521 AS builder
 WORKDIR /app
 COPY package.json bun.lock .
 COPY project.inlang ./project.inlang
