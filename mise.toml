@@ -22,7 +22,8 @@ run = "bun run format"
 run = "bun run test:unit"
 
 [tasks.codegen]
-run = "bun run postinstall"
+# Ensure svelte-kit types are generated for tests
+run = "bun run postinstall && bun run svelte-kit sync"
 
 [tasks.ci]
 depends = ["lint", "test"]
