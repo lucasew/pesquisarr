@@ -30,7 +30,6 @@ jobs:
       attestations: write
       id-token: write
       pull-requests: write
-      checks: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,6 +75,8 @@ jobs:
           exit 1
 
       - name: CI
+        env:
+          GITHUB_TOKEN: ''
         run: mise run ci
 
       - name: Make release if everything looks right
