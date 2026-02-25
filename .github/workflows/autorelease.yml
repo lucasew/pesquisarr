@@ -63,10 +63,10 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "chore: update generated code"
-          body: "Automated changes by codegen task."
-          branch: "codegen-update"
-          base: "${{ github.head_ref || github.ref_name }}"
+          title: 'chore: update generated code'
+          body: 'Automated changes by codegen task.'
+          branch: 'codegen-update'
+          base: '${{ github.head_ref || github.ref_name }}'
 
       - name: Stop if a pull request was created
         if: steps.cpr.outputs.pull-request-number != ''
