@@ -2,16 +2,25 @@
 _.path = ["./node_modules/.bin"]
 
 [tools]
-bun = "1.3.8"
-
-[hooks.postinstall]
-script = "bun install"
+bun = "1.3.9"
 
 [settings]
 experimental = true
 
+[tasks.install]
+run = "bun install"
+
 [tasks.lint]
 run = "bun run lint"
 
+[tasks.fmt]
+run = "bun run format"
+
+[tasks.test]
+run = "bun run test:unit"
+
+[tasks.codegen]
+run = "bun run postinstall"
+
 [tasks.ci]
-depends = ["lint"]
+depends = ["lint", "test"]
