@@ -30,6 +30,7 @@ jobs:
       attestations: write
       id-token: write
       pull-requests: write
+      checks: write
     steps:
       - uses: actions/checkout@v4
         with:
