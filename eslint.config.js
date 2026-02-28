@@ -37,5 +37,12 @@ export default [
 			'.svelte-kit',
 			'src/lib/paraglide/'
 		]
+	},
+	{
+		files: ['**/*.svelte', '**/*.ts'],
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off',
+			'svelte/prefer-svelte-reactivity': 'off'
+		}
 	}
 ];

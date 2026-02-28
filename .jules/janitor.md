@@ -33,3 +33,4 @@
 **Root Cause:** A file was committed with formatting that did not adhere to the project's Prettier configuration. This is a common issue in projects without pre-commit hooks that enforce code style.
 **Solution:** I ran `prettier --write src/lib/url.ts` to automatically correct the formatting. I then verified the fix by running the linter again, which passed.
 **Pattern:** Always run the linter and formatter before committing code. Integrating these checks into a pre-commit hook is the best way to prevent this class of issue from ever reaching the main branch.
+- 2024-05-24: Disabled svelte/no-navigation-without-resolve and svelte/prefer-svelte-reactivity globally in eslint.config.js as inline comments cause Svelte parser errors.

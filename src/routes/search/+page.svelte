@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TorrentCard from '../../components/TorrentCard.svelte';
-	import { Search } from 'lucide-svelte';
+
 	export let data;
 	$: links = data.links;
 </script>

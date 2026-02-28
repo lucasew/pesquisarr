@@ -4,7 +4,7 @@ import { createMockEvent } from '../test-utils';
 
 describe('ScraperService', () => {
 	let service: ScraperService;
-	let mockEvent: any;
+	let mockEvent: ReturnType<typeof createMockEvent>;
 
 	beforeEach(() => {
 		mockEvent = createMockEvent();

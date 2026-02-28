@@ -44,7 +44,7 @@ export default class HttpService extends BaseService {
 
 		return fetch(url, {
 			headers,
-			// @ts-ignore
+			// @ts-expect-error cf properties are non standard
 			cf: {
 				cacheTtl: ttl,
 				cacheEverything: true

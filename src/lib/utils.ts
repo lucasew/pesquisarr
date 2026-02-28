@@ -11,7 +11,7 @@ export function matchFirstGroup(text: string, regex: RegExp): string[] {
 }
 
 const { window } = parseHTML('');
-const purify = DOMPurify(window as any);
+const purify = DOMPurify(window as unknown as Window);
 
 export function htmlSanitize(str: string): string {
 	return purify.sanitize(str);
