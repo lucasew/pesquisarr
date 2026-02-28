@@ -1,4 +1,4 @@
-import SearchBaseService from '../search/base';
+import SearchBaseService from './base';
 
 export default class DuckDuckGoService extends SearchBaseService {
 	urlTemplate = 'https://duckduckgo.com/html?q=';

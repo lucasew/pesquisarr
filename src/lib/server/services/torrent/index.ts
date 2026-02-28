@@ -26,7 +26,7 @@ export default class TorrentService extends BaseService {
 				title
 			};
 		} catch (e) {
-			console.error('Failed to decode torrent bencode', e);
+			this.services.error.report(e, { message: 'Failed to decode torrent bencode' });
 			return null;
 		}
 	}
@@ -53,7 +53,7 @@ export default class TorrentService extends BaseService {
 				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
 				const dnMatch = link.match(/dn=([^&]*)/i);
 				if (xtMatch) {
-					let infoHash = xtMatch[1].toUpperCase();
+					const infoHash = xtMatch[1].toUpperCase();
 					const title = dnMatch ? he.encode(decodeURIComponent(dnMatch[1])) : '(NO NAME)';
 					if (infoHash.length === 40 || infoHash.length === 32) {
 						return { infoHash, title };

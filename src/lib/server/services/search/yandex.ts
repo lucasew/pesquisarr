@@ -1,4 +1,4 @@
-import SearchBaseService from '../search/base';
+import SearchBaseService from './base';
 
 export default class YandexService extends SearchBaseService {
 	urlTemplate = 'https://yandex.com/search/?text=';

@@ -1,14 +1,15 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import TorrentService from './torrent';
-import DuckDuckGoService from './search-duckduckgo';
-import GoogleService from './search-google';
-import YandexService from './search-yandex';
+import DuckDuckGoService from './search/duckduckgo';
+import GoogleService from './search/google';
+import YandexService from './search/yandex';
 import ImdbService from './imdb';
 import SearchService from './search';
 import ScraperService from './scraper';
 import RankService from './rank';
 import HttpService from './http';
 import SuggestionsService from './suggestions';
+import ErrorService from './error';
 
 export function getServices(event: RequestEvent) {
 	return {
@@ -21,7 +22,8 @@ export function getServices(event: RequestEvent) {
 		imdb: new ImdbService(event),
 		scraper: new ScraperService(event),
 		rank: new RankService(event),
-		suggestions: new SuggestionsService(event)
+		suggestions: new SuggestionsService(event),
+		error: new ErrorService(event)
 	};
 }
 
