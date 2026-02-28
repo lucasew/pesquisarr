@@ -11,7 +11,6 @@ export function createMockEvent(): RequestEvent {
 		platform: {
 			env: {}
 		},
-		// @ts-expect-error test utils
 		request: new Request('http://localhost'),
 		url: new URL('http://localhost'),
 		params: {},
