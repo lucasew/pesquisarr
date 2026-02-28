@@ -21,7 +21,11 @@ export default abstract class SearchBaseService extends BaseService {
 				.filter(isValidHttpUrl)
 				.map((url) => ({ link: url, source: this.sourceName }));
 		} catch (e) {
-			console.error(`Search failed for ${this.sourceName}:`, e);
+			this.services.error.report(e, {
+				sourceName: this.sourceName,
+				query,
+				message: 'Search failed'
+			});
 			return [];
 		}
 	}

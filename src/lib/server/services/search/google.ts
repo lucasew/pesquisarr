@@ -1,4 +1,4 @@
-import SearchBaseService from '../search/base';
+import SearchBaseService from './base';
 
 export default class GoogleService extends SearchBaseService {
 	urlTemplate = 'https://www.google.com/search?q=';

@@ -4,7 +4,9 @@ import { vi } from 'vitest';
 export function createMockEvent(): RequestEvent {
 	return {
 		locals: {
-			services: {}
+			services: {
+				error: { report: vi.fn() }
+			}
 		},
 		platform: {
 			env: {}

@@ -1,5 +1,5 @@
 import { htmlSanitize, matchFirstGroup } from '$lib/utils';
-import BaseService from '../base';
+import BaseService from './base';
 
 export const REGEX_IMDB_ID = /^tt\d{7,12}$/;
 
@@ -21,7 +21,7 @@ export default class ImdbService extends BaseService {
 			);
 			return htmlSanitize(matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE)[0]);
 		} catch (e) {
-			console.error(e);
+			this.services.error.report(e, { imdbId, message: 'IMDB title fetch failed' });
 			return htmlSanitize(imdbId);
 		}
 	}

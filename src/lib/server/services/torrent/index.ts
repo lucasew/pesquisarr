@@ -26,7 +26,7 @@ export default class TorrentService extends BaseService {
 				title
 			};
 		} catch (e) {
-			console.error('Failed to decode torrent bencode', e);
+			this.services.error.report(e, { message: 'Failed to decode torrent bencode' });
 			return null;
 		}
 	}
