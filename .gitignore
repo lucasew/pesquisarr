@@ -12,3 +12,6 @@ vite.config.ts.timestamp-*
 result
 package-lock.json
 dev_server.log
+
+# Sentry Config File
+.env.sentry-build-plugin
