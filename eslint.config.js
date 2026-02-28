@@ -18,11 +18,15 @@ export default [
 		}
 	},
 	{
-		files: ['**/*.svelte'],
+		files: ['**/*.svelte', '**/*.ts'],
 		languageOptions: {
 			parserOptions: {
 				parser: tseslint.parser
 			}
+		},
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off',
+			'svelte/prefer-svelte-reactivity': 'off'
 		}
 	},
 	{

@@ -26,7 +26,7 @@
 			<div>
 				<h3 class="text-xs uppercase tracking-wider font-bold mb-1">Trackers</h3>
 				<ul class="list-none text-sm">
-					{#each [torrentURL.searchParams.getAll('tr')] as trackers}
+					{#each [torrentURL.searchParams.getAll('tr')] as trackers, i (i)}
 						{#each trackers.slice(0, 3) as tracker (tracker)}
 							<li class="truncate">{tracker}</li>
 						{/each}

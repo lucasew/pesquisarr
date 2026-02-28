@@ -11,12 +11,12 @@ export function createMockEvent(): RequestEvent {
 		platform: {
 			env: {}
 		},
-		// @ts-ignore
+		// @ts-expect-error test utils
 		request: new Request('http://localhost'),
 		url: new URL('http://localhost'),
 		params: {},
 		route: { id: null },
-		cookies: {} as any,
+		cookies: {} as unknown,
 		fetch: vi.fn(),
 		getClientAddress: vi.fn(),
 		isDataRequest: false,

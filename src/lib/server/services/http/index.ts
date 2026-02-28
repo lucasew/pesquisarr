@@ -44,7 +44,7 @@ export default class HttpService extends BaseService {
 
 		return fetch(url, {
 			headers,
-			// @ts-ignore
+			// @ts-expect-error cf is cloudflare specific
 			cf: {
 				cacheTtl: ttl,
 				cacheEverything: true
