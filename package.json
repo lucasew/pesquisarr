@@ -16,7 +16,7 @@
 	"devDependencies": {
 		"@cloudflare/kv-asset-handler": "^0.4.2",
 		"@cloudflare/workers-types": "^4.20260228.1",
-		"@eslint/js": "^9.39.3",
+		"@eslint/js": "^10.0.0",
 		"@inlang/paraglide-js": "2.10.0",
 		"@macfja/svelte-multi-adapter": "^1.0.2",
 		"@sveltejs/adapter-auto": "^7.0.1",
@@ -28,7 +28,7 @@
 		"@typescript-eslint/parser": "^8.56.1",
 		"autoprefixer": "^10.4.27",
 		"daisyui": "^5.5.19",
-		"eslint": "^9.39.3",
+		"eslint": "^10.0.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.15.0",
 		"globals": "^17.3.0",
