@@ -4,11 +4,8 @@ on:
   push:
     branches:
       - master
-    tags:
-      - '*'
+      - main
   pull_request:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       new_version:
@@ -19,8 +16,7 @@ on:
           - patch
           - minor
           - major
-  schedule:
-    - cron: '0 2 * * 6' # saturday 2am
+
 jobs:
   autorelease:
     env:
@@ -35,46 +31,53 @@ jobs:
       id-token: write
       pull-requests: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@v2
+        with:
+          version: 2024.11.23
+
       - name: Login to registry
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ env.USERNAME }}
           password: ${{ github.token }}
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8 # v3
+      - name: Install
+        run: mise run install
 
-      - name: Setup git config
+      - name: Codegen
+        run: mise run codegen
+
+      - name: Check for changes
+        id: git-check
         run: |
-          git config user.name actions-bot
-          git config user.email actions-bot@users.noreply.github.com
+          git diff --exit-code || echo "changes=true" >> $GITHUB_OUTPUT
 
-      - name: Update bun.lock
-        run: bun install
-
-      - name: Create Pull Request if there is new stuff from updaters
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8
-        id: pr_create
+      - name: Create Pull Request
+        if: steps.git-check.outputs.changes == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: Updater script changes
-          branch: updater-bot
-          delete-branch: true
-          title: 'Updater: stuff changed'
-          body: |
-            Changes caused from update scripts
+          title: 'chore: update generated code'
+          body: 'Automated changes by codegen task.'
+          branch: 'codegen-update'
+          base: '${{ github.head_ref || github.ref_name }}'
 
       - name: Stop if a pull request was created
-        if: github.event_name != 'pull_request'
-        env:
-          PR_NUMBER: ${{ steps.pr_create.outputs.pull-request-number }}
+        if: steps.cpr.outputs.pull-request-number != ''
         run: |
-          if [[ ! -z "$PR_NUMBER" ]]; then
-            echo "The update scripts changed something and a PR was created. Giving up deploy." >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
+          echo "The update scripts changed something and a PR was created. Giving up deploy." >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+      - name: CI
+        env:
+          GITHUB_TOKEN: ''
+        run: mise run ci
 
       - name: Make release if everything looks right
         if: github.event_name != 'pull_request'
@@ -94,7 +97,7 @@ jobs:
           VERSION="$(cat version.txt)"
           docker build -t "$TAG:$VERSION" .
 
-      - name: Create relase
+      - name: Create release
         if: github.event_name != 'pull_request' && env.RELEASE_VERSION != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -106,7 +109,7 @@ jobs:
             --generate-notes \
             --notes-start-tag $(gh release list --limit 1 --json tagName -q .[].tagName)
 
-      - name: 'Build and publish container'
+      - name: Build and publish container
         if: github.event_name != 'pull_request' && env.RELEASE_VERSION != ''
         env:
           TAG: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
