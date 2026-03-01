@@ -17,7 +17,7 @@
 		"@cloudflare/kv-asset-handler": "^0.4.2",
 		"@cloudflare/workers-types": "^4.20260228.1",
 		"@eslint/js": "^9.39.3",
-		"@inlang/paraglide-js": "2.10.0",
+		"@inlang/paraglide-js": "2.13.0",
 		"@macfja/svelte-multi-adapter": "^1.0.2",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
