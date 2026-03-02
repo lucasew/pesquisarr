@@ -6,7 +6,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
-FROM node:lts-alpine@sha256:931d7d57f8c1fd0e2179dbff7cc7da4c9dd100998bc2b32afc85142d8efbc213
+FROM node:lts-alpine@sha256:7fddd9ddeae8196abf4a3ef2de34e11f7b1a722119f91f28ddf1e99dcafdf114
 # bun can't deal with socket activation on systemd yet
 # FROM oven/bun:1-alpine
 RUN apk add curl
