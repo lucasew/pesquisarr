@@ -7,7 +7,20 @@ export interface TorrentStream {
 	title: string;
 }
 
+/**
+ * Service for parsing and decoding torrent data formats.
+ * Normalizes both raw `.torrent` files and magnet URIs into a standard `TorrentStream` object
+ * containing an uppercase `infoHash` and a sanitized `title`.
+ */
 export default class TorrentService extends BaseService {
+	/**
+	 * Extracts the infohash and display name from a raw bencoded `.torrent` file buffer.
+	 * Computes the SHA-1 digest from the exact byte range of the `info` dictionary,
+	 * ensuring the hash matches what torrent clients expect. Titles are HTML-entity encoded via `he` to prevent XSS.
+	 *
+	 * @param torrent - The raw array buffer of a `.torrent` file
+	 * @returns The parsed stream containing `infoHash` and `title`, or null if decoding fails
+	 */
 	async decodeTorrent(torrent: ArrayBuffer): Promise<TorrentStream | null> {
 		try {
 			const unbencode = decodeBencode(torrent, null, null, 'utf8');
@@ -31,6 +44,14 @@ export default class TorrentService extends BaseService {
 		}
 	}
 
+	/**
+	 * Parses a magnet URI string to extract the `infoHash` (`xt` parameter) and title (`dn` parameter).
+	 * Handles standard URI parsing via `new URL()` as well as a regex fallback for malformed or non-standard `magnet:?` strings.
+	 * Currently accepts both 40-character Hex and 32-character Base32 infohashes, normalizing them to uppercase.
+	 *
+	 * @param link - The raw magnet link string
+	 * @returns The parsed stream or null if the infohash is missing/invalid length
+	 */
 	parseMagnet(link: string): TorrentStream | null {
 		try {
 			const parsedURL = new URL(link);

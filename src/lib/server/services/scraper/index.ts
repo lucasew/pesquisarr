@@ -6,7 +6,24 @@ import { isValidHttpUrl } from '$lib/url';
 export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
 export const REGEX_MATCH_INFOHASH = /[0-9A-F]{40}/i;
 
+/**
+ * Orchestration service for resolving search results into actual torrent streams.
+ * Acts as the bridge between search engine results, direct torrent downloads, and HTML scraping.
+ */
 export default class ScraperService extends BaseService {
+	/**
+	 * Inspects a given URL to fetch and decode torrent data based on the HTTP `Content-Type`.
+	 *
+	 * - If it identifies a `.torrent` file (via MIME type or URL extension), it downloads
+	 *   and decodes the bencoded buffer.
+	 * - Otherwise, it fetches the HTML and scrapes the page using regex for magnet URIs.
+	 *
+	 * Note: Bypasses fetching entirely if the `url` is an invalid HTTP string.
+	 *
+	 * @param url - The external site URL or direct `.torrent` download link
+	 * @param referer - Optional referer header for bypassing hotlinking protection on certain trackers
+	 * @returns An array of parsed `TorrentStream`s found at the target URL
+	 */
 	async fetchTorrentsInSite(url: string, referer?: string): Promise<TorrentStream[]> {
 		if (!isValidHttpUrl(url)) {
 			return [];
@@ -41,6 +58,19 @@ export default class ScraperService extends BaseService {
 		}
 	}
 
+	/**
+	 * Main workflow to discover torrent streams for a given IMDb title.
+	 *
+	 * 1. Fetches the readable title from IMDb.
+	 * 2. Queries multiple search engines concurrently (`SearchService`).
+	 * 3. Ranks and limits the unified links (`RankService`).
+	 * 4. Iterates over the top links to fetch their actual torrents (`fetchTorrentsInSite`).
+	 *    - Employs a staggered jitter delay during concurrent fetching to avoid HTTP burst limits.
+	 * 5. Deduplicates all found streams by `infoHash` and returns the final unique list.
+	 *
+	 * @param imdbId - The canonical IMDb identifier (e.g. "tt0111161")
+	 * @returns An array of unique, parsed torrent streams corresponding to the given title
+	 */
 	async getTorrentStreams(imdbId: string): Promise<TorrentStream[]> {
 		const title = await this.services.imdb.getTitleById(imdbId);
 		const searchResults = await this.services.search.search(title);
