@@ -34,8 +34,7 @@ export default abstract class SearchBaseService extends BaseService {
 		try {
 			const results = await this.search('test');
 			return { ok: results.length > 0 };
-		} catch (e) {
-			this.services.error.report(e, { message: `${this.sourceName} health check failed` });
+		} catch {
 			return { ok: false, error: `${this.sourceName} search unavailable` };
 		}
 	}

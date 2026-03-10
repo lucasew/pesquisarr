@@ -25,8 +25,7 @@ export default class HttpService extends BaseService {
 			} else {
 				headers['Sec-Fetch-Site'] = 'none';
 			}
-		} catch (e) {
-			this.services.error.report(e, { message: 'Failed to construct URL for Sec-Fetch-Site', url });
+		} catch {
 			headers['Sec-Fetch-Site'] = 'none';
 		}
 
