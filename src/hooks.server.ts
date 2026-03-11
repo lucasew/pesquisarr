@@ -1,4 +1,4 @@
-import { sequence } from '@sveltejs/kit/hooks';
+import {sequence} from '@sveltejs/kit/hooks';
 import * as Sentry from '@sentry/sveltekit';
 import { paraglideMiddleware } from '$lib/paraglide/server';
 import { initializeServices } from '$lib/server/services';
