@@ -25,7 +25,8 @@ export default class HttpService extends BaseService {
 			} else {
 				headers['Sec-Fetch-Site'] = 'none';
 			}
-		} catch {
+		} catch (e) {
+			this.services.error.report(e, { url, message: 'URL parsing failed in getStealthHeaders' });
 			headers['Sec-Fetch-Site'] = 'none';
 		}
 

@@ -6,6 +6,15 @@ import { isValidHttpUrl } from '$lib/url';
 export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
 export const REGEX_MATCH_INFOHASH = /[0-9A-F]{40}/i;
 
+const CONTENT_TYPE_BITTORRENT = 'application/x-bittorrent';
+const CONTENT_TYPE_OCTET_STREAM = 'application/octet-stream';
+
+const SOURCE_REFERERS: Record<string, string> = {
+	Google: 'https://www.google.com/',
+	DuckDuckGo: 'https://duckduckgo.com/',
+	Yandex: 'https://yandex.com/'
+};
+
 export default class ScraperService extends BaseService {
 	async fetchTorrentsInSite(url: string, referer?: string): Promise<TorrentStream[]> {
 		if (!isValidHttpUrl(url)) {
@@ -19,14 +28,14 @@ export default class ScraperService extends BaseService {
 			const response = await this.services.http.fetch(url, 2 * 3600, extraHeaders);
 			const contentType = response.headers.get('Content-Type') || '';
 			if (
-				contentType.includes('application/x-bittorrent') ||
+				contentType.includes(CONTENT_TYPE_BITTORRENT) ||
 				url.search(REGEX_MATCH_INFOHASH) !== -1 ||
 				url.endsWith('.torrent')
 			) {
 				const arrayBuffer = await response.arrayBuffer();
 				const stream = await this.services.torrent.decodeTorrent(arrayBuffer);
 				return stream ? [stream] : [];
-			} else if (contentType.includes('application/octet-stream')) {
+			} else if (contentType.includes(CONTENT_TYPE_OCTET_STREAM)) {
 				return [];
 			} else {
 				const text = await response.text();
@@ -51,19 +60,13 @@ export default class ScraperService extends BaseService {
 		// Use a limited number of links to avoid hitting limits or taking too long
 		const topLinks = rankedLinks.slice(0, 10);
 
-		const sourceReferers: Record<string, string> = {
-			Google: 'https://www.google.com/',
-			DuckDuckGo: 'https://duckduckgo.com/',
-			Yandex: 'https://yandex.com/'
-		};
-
 		const fetchedResults = await Promise.all(
 			topLinks.map(async (url, index) => {
 				// Add jitter to avoid simultaneous bursts
 				const delay = index * 20 + Math.random() * 100;
 				await new Promise((resolve) => setTimeout(resolve, delay));
 				const source = refererMap.get(url);
-				const referer = source ? sourceReferers[source] : undefined;
+				const referer = source ? SOURCE_REFERERS[source] : undefined;
 				return this.fetchTorrentsInSite(url, referer);
 			})
 		);
