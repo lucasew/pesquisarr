@@ -47,19 +47,24 @@ export default class TorrentService extends BaseService {
 
 			const title = he.encode(parsedURL.searchParams.get('dn') || '(NO NAME)');
 			return { infoHash, title };
-		} catch {
+		} catch (e) {
 			// Handle cases where magnet link is not a valid URL (some might be just magnet:?...)
 			if (link.startsWith('magnet:?')) {
-				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
-				const dnMatch = link.match(/dn=([^&]*)/i);
-				if (xtMatch) {
-					const infoHash = xtMatch[1].toUpperCase();
-					const title = dnMatch ? he.encode(decodeURIComponent(dnMatch[1])) : '(NO NAME)';
-					if (infoHash.length === 40 || infoHash.length === 32) {
-						return { infoHash, title };
+				try {
+					const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
+					const dnMatch = link.match(/dn=([^&]*)/i);
+					if (xtMatch) {
+						const infoHash = xtMatch[1].toUpperCase();
+						const title = dnMatch ? he.encode(decodeURIComponent(dnMatch[1])) : '(NO NAME)';
+						if (infoHash.length === 40 || infoHash.length === 32) {
+							return { infoHash, title };
+						}
 					}
+				} catch (fallbackError) {
+					this.services.error.report(fallbackError, { link, message: 'Failed to parse magnet link in fallback' });
 				}
 			}
+			this.services.error.report(e, { link, message: 'Failed to parse magnet link' });
 			return null;
 		}
 	}
