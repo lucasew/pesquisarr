@@ -61,7 +61,10 @@ export default class TorrentService extends BaseService {
 						}
 					}
 				} catch (fallbackError) {
-					this.services.error.report(fallbackError, { link, message: 'Failed to parse magnet link in fallback' });
+					this.services.error.report(fallbackError, {
+						link,
+						message: 'Failed to parse magnet link in fallback'
+					});
 				}
 			}
 			this.services.error.report(e, { link, message: 'Failed to parse magnet link' });
