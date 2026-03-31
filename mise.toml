@@ -8,10 +8,11 @@ bun = "1.3.8"
 script = "bun install"
 
 [settings]
-experimental = true
+experimental = false
 
 [tasks.lint]
 run = "bun run lint"
 
 [tasks.ci]
 depends = ["lint"]
+run = "bun run test:unit"
