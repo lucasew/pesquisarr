@@ -25,4 +25,9 @@ describe('isValidHttpUrl', () => {
 		expect(isValidHttpUrl('http://127.0.0.1')).toBe(false);
 		expect(isValidHttpUrl('http://localhost')).toBe(false);
 	});
+
+	it('should return false for link-local addresses', () => {
+		expect(isValidHttpUrl('http://169.254.169.254')).toBe(false);
+		expect(isValidHttpUrl('http://[fe80::1]')).toBe(false);
+	});
 });

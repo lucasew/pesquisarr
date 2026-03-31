@@ -24,8 +24,10 @@ export function isValidHttpUrl(url: string): boolean {
 			/^10\./, // IPv4 private Class A: 10.0.0.0/8
 			/^172\.(1[6-9]|2[0-9]|3[0-1])\./, // IPv4 private Class B: 172.16.0.0/12
 			/^192\.168\./, // IPv4 private Class C: 192.168.0.0/16
+			/^169\.254\./, // IPv4 link-local: 169.254.0.0/16
 			/^::1$/, // IPv6 loopback: ::1
-			/^fd[0-9a-f]{2}:/i // IPv6 unique local addresses: fc00::/7
+			/^fd[0-9a-f]{2}:/i, // IPv6 unique local addresses: fc00::/7
+			/^fe80:/i // IPv6 link-local addresses: fe80::/10
 		];
 
 		if (privateIpRegexes.some((regex) => regex.test(hostname))) {
