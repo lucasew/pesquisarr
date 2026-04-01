@@ -7,6 +7,17 @@ export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
 export const REGEX_MATCH_INFOHASH = /[0-9A-F]{40}/i;
 
 export default class ScraperService extends BaseService {
+	/**
+	 * Scrapes a given URL for torrent streams, handling both direct `.torrent` downloads (binary)
+	 * and HTML scraping for `magnet:` links.
+	 *
+	 * Uses stealth headers via the HTTP service and applies referer masquerading if provided.
+	 * Non-HTTP/HTTPS URLs, octet streams, or unparseable bencode are safely ignored and return empty arrays.
+	 *
+	 * @param url The target URL to scrape or download.
+	 * @param referer Optional source search engine URL to pass as the `Referer` header to avoid blocks.
+	 * @returns Array of parsed torrent streams (infoHash and title).
+	 */
 	async fetchTorrentsInSite(url: string, referer?: string): Promise<TorrentStream[]> {
 		if (!isValidHttpUrl(url)) {
 			return [];
@@ -41,6 +52,18 @@ export default class ScraperService extends BaseService {
 		}
 	}
 
+	/**
+	 * End-to-end flow to find torrent streams for a given IMDb ID.
+	 *
+	 * 1. Resolves IMDb ID to a searchable title.
+	 * 2. Fetches and aggregates URLs from configured search engines (Google, DDG, Yandex).
+	 * 3. Ranks and deduplicates URLs, taking only the top 10 to respect rate limits.
+	 * 4. Concurrently scrapes the top URLs with a slight jittered delay to prevent simultaneous request bursts.
+	 * 5. Aggregates all found torrents and deduplicates them by their uppercase infoHash.
+	 *
+	 * @param imdbId The target IMDb identifier (e.g. `tt0111161`).
+	 * @returns A deduplicated list of aggregated torrent streams.
+	 */
 	async getTorrentStreams(imdbId: string): Promise<TorrentStream[]> {
 		const title = await this.services.imdb.getTitleById(imdbId);
 		const searchResults = await this.services.search.search(title);
