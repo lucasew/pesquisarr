@@ -1,5 +1,6 @@
 // stolen from: https://raw.githubusercontent.com/Chocobo1/bencode_online/master/src/bencode/decode.js
 
+// @ts-nocheck
 const INTEGER_START = 0x69; // 'i'
 const STRING_DELIM = 0x3a; // ':'
 const DICTIONARY_START = 0x64; // 'd'
