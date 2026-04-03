@@ -15,7 +15,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	// For each search result, fetch torrents and tag with source
 	const fetched = await Promise.all(
 		searchResults.map(async (r) => {
-			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch(() => []);
+			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch((e) => {
+				services.error.report(e, {
+					message: 'Failed to fetch torrents in site from search',
+					context: { link: r.link }
+				});
+				return [];
+			});
 			return streams.map((s) => {
 				let magnet = `magnet:?xt=urn:btih:${s.infoHash}`;
 				if (s.title) {
