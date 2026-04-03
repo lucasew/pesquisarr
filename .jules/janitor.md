@@ -34,3 +34,4 @@
 **Solution:** I ran `prettier --write src/lib/url.ts` to automatically correct the formatting. I then verified the fix by running the linter again, which passed.
 **Pattern:** Always run the linter and formatter before committing code. Integrating these checks into a pre-commit hook is the best way to prevent this class of issue from ever reaching the main branch.
 - 2026-04-03: [Remove unused imports, such as replayIntegration in Sentry config, to pass eslint.]
+- 2026-04-03: [When migrating away from SvelteKit's instrumentation hook to fix adapter issues, relocate the Sentry initialization logic into hooks.server.ts instead of silently deleting it.]
