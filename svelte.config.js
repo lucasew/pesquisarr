@@ -28,10 +28,6 @@ const config = {
 		experimental: {
 			tracing: {
 				server: false
-			},
-
-			instrumentation: {
-				server: true
 			}
 		}
 	}
