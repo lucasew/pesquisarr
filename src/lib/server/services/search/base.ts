@@ -4,11 +4,28 @@ import BaseService from '../base';
 
 export type SearchResult = { link: string; source: string };
 
+/**
+ * Base abstract class for search engine scrapers.
+ * It provides the core workflow: fetching HTML, extracting links via regex,
+ * decoding URLs, deduplicating, and validating them.
+ */
 export default abstract class SearchBaseService extends BaseService {
 	abstract get urlTemplate(): string;
 	abstract get regex(): RegExp;
 	abstract get sourceName(): string;
 
+	/**
+	 * Executes the search query against the engine.
+	 *
+	 * - Uses HTTP caching (ttl=3600) to avoid rate limits.
+	 * - Extracts links from the raw HTML using the engine-specific regex.
+	 * - Deduplicates and decodes URLs.
+	 * - Validates URLs and drops invalid ones.
+	 * - On failure, reports to the centralized error service and returns an empty array to prevent crashing aggregators.
+	 *
+	 * @param query The user's search query
+	 * @returns Array of validated search results (links and their source engine)
+	 */
 	async search(query: string): Promise<SearchResult[]> {
 		try {
 			const responseText = await this.services.http.getHtml(
@@ -30,6 +47,9 @@ export default abstract class SearchBaseService extends BaseService {
 		}
 	}
 
+	/**
+	 * Checks if the engine is reachable and returning parsable results.
+	 */
 	async healthCheck() {
 		try {
 			const results = await this.search('test');
