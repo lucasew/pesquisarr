@@ -12,11 +12,6 @@ This file lists patterns of changes that have been consistently rejected by huma
 
 ---
 
-## IGNORE: Moving Sentry initialization out of instrumentation.server.ts
-**- Pattern:** Do not delete `src/instrumentation.server.ts` or move its Sentry initialization logic into `src/hooks.server.ts`.
-**- Justification:** This change has been consistently rejected across multiple PRs. The Sentry integration relies on the instrumentation hook for early initialization, and migrating it out breaks the intended setup or conflicts with the current adapter configuration.
-**- Files Affected:** `src/instrumentation.server.ts`, `src/hooks.server.ts`
-
 ## IGNORE: Unnecessary formatting and auto-generated file changes
 **- Pattern:** Do not commit unrelated formatting changes to files like `.mcp.json`, `svelte.config.js`, or changes to auto-generated localization files in `src/lib/paraglide/**/*` and `src/lib/messages/*.json` (e.g. adding dummy keys).
 **- Justification:** Formatting changes outside the primary scope cause noise and clutter the git history. Modifying auto-generated Paraglide files manually is futile as they are overwritten during the build process, and adding dummy keys just to pass compilation is an incorrect fix.
@@ -26,3 +21,8 @@ This file lists patterns of changes that have been consistently rejected by huma
 **- Pattern:** Do not change the `defineConfig` import in `vite.config.ts` from `vite` to `vitest/config`.
 **- Justification:** This change has been rejected because it interferes with the Vite/SvelteKit setup. The project configuration expects the import to remain from `vite` or `vitest/config` as it originally was, and changing it to satisfy linting or typing issues breaks the build or test configuration.
 **- Files Affected:** `vite.config.ts`
+
+## IGNORE: Moving Sentry initialization
+**- Pattern:** Do not move Sentry initialization from `src/hooks.client.ts` or `src/instrumentation.server.ts` to `src/hooks.server.ts` and do not delete `src/instrumentation.server.ts`.
+**- Justification:** The project intentionally initializes Sentry in `src/instrumentation.server.ts` using the `experimental.instrumentation` config in `svelte.config.js`. Moving this logic out to `src/hooks.server.ts` or removing the configuration causes issues and has been consistently rejected by reviewers. Even if the adapter throws errors locally about instrumentation not being supported, you MUST NOT delete or modify `src/instrumentation.server.ts`.
+**- Files Affected:** `src/instrumentation.server.ts`, `src/hooks.server.ts`, `svelte.config.js`
