@@ -11,7 +11,9 @@
 		"check": "astro check",
 		"test:unit": "vitest",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"dev:cf": "astro build && wrangler dev",
+		"preview:cf": "wrangler dev"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.7.0",

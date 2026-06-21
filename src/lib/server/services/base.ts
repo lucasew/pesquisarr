@@ -1,4 +1,5 @@
 import type { AppEvent } from '../app-event';
+import { getRequestWorkerEnv } from '../worker-env';
 
 export interface HealthCheckResult {
 	ok: boolean;
@@ -24,7 +25,8 @@ export default abstract class BaseService {
 	}
 
 	protected get env() {
-		return this.event.platform?.env ?? (this.event.locals as { runtime?: { env?: Record<string, unknown> } }).runtime?.env;
+		// Prefer request-scoped CF env set by middleware; never touch locals.runtime (removed in Astro 6)
+		return this.event.platform?.env ?? getRequestWorkerEnv();
 	}
 
 	protected get platform() {

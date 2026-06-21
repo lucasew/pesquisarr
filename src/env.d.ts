@@ -3,15 +3,20 @@
 
 import type { getServices } from './lib/server/services';
 
-interface CloudflareEnv {
+declare namespace App {
+	interface Locals {
+		services: ReturnType<typeof getServices>;
+		locale?: string;
+		/** Cloudflare execution context (Astro 6 @astrojs/cloudflare) */
+		cfContext?: ExecutionContext;
+	}
+}
+
+// Augment when wrangler types are generated
+interface Env {
 	[key: string]: unknown;
 }
 
-type Runtime = import('@astrojs/cloudflare').Runtime<CloudflareEnv>;
-
-declare namespace App {
-	interface Locals extends Runtime {
-		services: ReturnType<typeof getServices>;
-		locale?: string;
-	}
+declare module 'cloudflare:workers' {
+	export const env: Env;
 }
