@@ -20,6 +20,7 @@
 		"@astrojs/node": "^10.1.4",
 		"@astrojs/svelte": "^8.1.2",
 		"@sentry/astro": "^10.59.0",
+		"@sentry/cloudflare": "^10.59.0",
 		"@tailwindcss/postcss": "^4.2.1",
 		"@types/dompurify": "^3.2.0",
 		"astro": "^6.4.8",
