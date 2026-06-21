@@ -6,11 +6,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		return { links: [] };
 	}
 
-	const selectedEngines = ['google', 'duckduckgo', 'yandex'];
-
 	const { services } = locals;
-	// Gather search results with source tags
-	const searchResults = await services.search.search(query, selectedEngines);
+	// Gather search results with source tags (default engines: google, duckduckgo, yandex)
+	const searchResults = await services.search.search(query);
 
 	// For each search result, fetch torrents and tag with source
 	const fetched = await Promise.all(

@@ -1,15 +1,25 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
+import type { RequestEvent } from '@sveltejs/kit';
 import ScraperService from './index';
 import { createMockEvent } from '../test-utils';
 
+type MockServices = {
+	http: { fetch: Mock; getHtml: Mock; getBuffer: Mock };
+	torrent: { decodeTorrent: Mock; parseMagnet: Mock };
+	imdb: { getTitleById: Mock };
+	search: { search: Mock };
+	rank: { rank: Mock };
+	error: { report: Mock };
+};
+
 describe('ScraperService', () => {
 	let service: ScraperService;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let mockEvent: any;
+	let mockEvent: RequestEvent;
+	let mocks: MockServices;
 
 	beforeEach(() => {
 		mockEvent = createMockEvent();
-		mockEvent.locals.services = {
+		mocks = {
 			http: {
 				fetch: vi.fn(),
 				getHtml: vi.fn(),
@@ -26,21 +36,23 @@ describe('ScraperService', () => {
 				search: vi.fn()
 			},
 			rank: {
-				rank: vi.fn((links) => links)
-			}
+				rank: vi.fn((links: string[]) => links)
+			},
+			error: { report: vi.fn() }
 		};
+		mockEvent.locals.services = mocks as unknown as typeof mockEvent.locals.services;
 		service = new ScraperService(mockEvent);
 	});
 
 	describe('fetchTorrentsInSite', () => {
 		it('should extract magnets from HTML', async () => {
 			const html = 'Some html with magnet:?xt=urn:btih:ABC and magnet:?xt=urn:btih:DEF';
-			mockEvent.locals.services.http.fetch.mockResolvedValue({
+			mocks.http.fetch.mockResolvedValue({
 				ok: true,
 				headers: new Map([['Content-Type', 'text/html']]),
 				text: () => Promise.resolve(html)
 			});
-			mockEvent.locals.services.torrent.parseMagnet.mockImplementation((m: string) => ({
+			mocks.torrent.parseMagnet.mockImplementation((m: string) => ({
 				infoHash: m.split(':').pop(),
 				title: 'test'
 			}));
@@ -51,12 +63,12 @@ describe('ScraperService', () => {
 		});
 
 		it('should handle .torrent files', async () => {
-			mockEvent.locals.services.http.fetch.mockResolvedValue({
+			mocks.http.fetch.mockResolvedValue({
 				ok: true,
 				headers: new Map([['Content-Type', 'application/x-bittorrent']]),
 				arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
 			});
-			mockEvent.locals.services.torrent.decodeTorrent.mockResolvedValue({
+			mocks.torrent.decodeTorrent.mockResolvedValue({
 				infoHash: 'DECODED',
 				title: 'Decoded Torrent'
 			});
@@ -67,12 +79,12 @@ describe('ScraperService', () => {
 		});
 
 		it('should skip if decodeTorrent fails', async () => {
-			mockEvent.locals.services.http.fetch.mockResolvedValue({
+			mocks.http.fetch.mockResolvedValue({
 				ok: true,
 				headers: new Map([['Content-Type', 'application/x-bittorrent']]),
 				arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
 			});
-			mockEvent.locals.services.torrent.decodeTorrent.mockResolvedValue(null);
+			mocks.torrent.decodeTorrent.mockResolvedValue(null);
 
 			const result = await service.fetchTorrentsInSite('https://example.com/bad.torrent');
 			expect(result).toHaveLength(0);
@@ -81,12 +93,9 @@ describe('ScraperService', () => {
 
 	describe('getTorrentStreams', () => {
 		it('should orchestrate the full flow', async () => {
-			mockEvent.locals.services.imdb.getTitleById.mockResolvedValue('Movie Title');
-			mockEvent.locals.services.search.search.mockResolvedValue([
-				{ link: 'https://site1.com', source: 'Google' }
-			]);
+			mocks.imdb.getTitleById.mockResolvedValue('Movie Title');
+			mocks.search.search.mockResolvedValue([{ link: 'https://site1.com', source: 'Google' }]);
 
-			// Mock fetchTorrentsInSite inside the service
 			vi.spyOn(service, 'fetchTorrentsInSite').mockResolvedValue([
 				{ infoHash: 'HASH1', title: 'Title 1' }
 			]);

@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import DOMPurify, { type WindowLike } from 'dompurify';
 import { parseHTML } from 'linkedom';
 
 export function matchFirstGroup(text: string, regex: RegExp): string[] {
@@ -11,8 +11,7 @@ export function matchFirstGroup(text: string, regex: RegExp): string[] {
 }
 
 const { window } = parseHTML('');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const purify = DOMPurify(window as any);
+const purify = DOMPurify(window as unknown as WindowLike);
 
 export function htmlSanitize(str: string): string {
 	return purify.sanitize(str);
