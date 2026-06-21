@@ -13,8 +13,9 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .cloudflare
 result
-package-lock.json
 dev_server.log
+bun.lock
+bun.lockb
 
 # Sentry Config File
 .env.sentry-build-plugin

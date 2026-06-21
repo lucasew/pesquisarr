@@ -51,8 +51,8 @@ jobs:
           git config user.name actions-bot
           git config user.email actions-bot@users.noreply.github.com
 
-      - name: Update bun.lock
-        run: bun install
+      - name: Install dependencies
+        run: npm ci
 
       - name: Create Pull Request if there is new stuff from updaters
         if: github.event_name != 'pull_request'
