@@ -4,17 +4,18 @@ COPY package.json bun.lock .
 COPY project.inlang ./project.inlang
 RUN bun install --frozen-lockfile
 COPY . .
+# Build with node adapter for Docker/server deployments
+ENV ASTRO_ADAPTER=node
 RUN bun run build
 
 FROM node:lts-alpine@sha256:931d7d57f8c1fd0e2179dbff7cc7da4c9dd100998bc2b32afc85142d8efbc213
-# bun can't deal with socket activation on systemd yet
-# FROM oven/bun:1-alpine
 RUN apk add curl
 WORKDIR /app
-COPY --from=builder /app/build build/
+COPY --from=builder /app/dist dist/
 COPY --from=builder /app/node_modules node_modules/
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
-# CMD [ "bun", "./build" ]
-CMD [ "node", "./build" ]
+ENV HOST=0.0.0.0
+ENV PORT=3000
+CMD [ "node", "./dist/server/entry.mjs" ]

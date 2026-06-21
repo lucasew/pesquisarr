@@ -1,7 +1,7 @@
 import { json } from '$lib/requests';
-import type { RequestHandler } from './$types';
+import type { APIRoute } from 'astro';
 
-export const GET: RequestHandler = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals }) => {
 	const { services } = locals;
 	const healthChecks = await Promise.all([
 		services.torrent.healthCheck(),

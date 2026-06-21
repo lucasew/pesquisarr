@@ -1,4 +1,4 @@
-import type { RequestEvent } from '@sveltejs/kit';
+import type { AppEvent } from '../app-event';
 
 export interface HealthCheckResult {
 	ok: boolean;
@@ -6,9 +6,9 @@ export interface HealthCheckResult {
 }
 
 export default abstract class BaseService {
-	protected event: RequestEvent;
+	protected event: AppEvent;
 
-	constructor(event: RequestEvent) {
+	constructor(event: AppEvent) {
 		this.event = event;
 	}
 
@@ -24,7 +24,7 @@ export default abstract class BaseService {
 	}
 
 	protected get env() {
-		return this.event.platform?.env;
+		return this.event.platform?.env ?? (this.event.locals as { runtime?: { env?: Record<string, unknown> } }).runtime?.env;
 	}
 
 	protected get platform() {

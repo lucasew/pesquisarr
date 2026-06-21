@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/sveltekit';
+import * as Sentry from '@sentry/astro';
 import BaseService from '../base';
 
 export default class ErrorService extends BaseService {

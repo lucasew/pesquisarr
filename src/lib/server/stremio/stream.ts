@@ -1,8 +1,8 @@
 import { json } from '$lib/requests';
-import type { RequestEvent } from '@sveltejs/kit';
+import type { AppEvent } from '../app-event';
 
 /** Shared Stremio stream handler for movie/series (same logic, different resource types only). */
-export async function handleStremioStream({ params, locals }: RequestEvent) {
+export async function handleStremioStream({ params, locals }: AppEvent) {
 	const { services } = locals;
 	const imdbId = params.name ?? '';
 	if (!services.imdb.isValidId(imdbId)) {
