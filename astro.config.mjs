@@ -9,7 +9,8 @@ const useNode = process.env.ASTRO_ADAPTER === 'node';
 const sentryDisabled = process.env.SENTRY_DISABLED === '1';
 
 // https://astro.build/config
-// Sentry: https://docs.sentry.io/platforms/javascript/guides/astro/
+// Sentry: server-only (no client bundle / no browser init)
+// https://docs.sentry.io/platforms/javascript/guides/astro/
 export default defineConfig({
 	output: 'server',
 	adapter: useNode
@@ -21,17 +22,24 @@ export default defineConfig({
 			}),
 	integrations: [
 		svelte(),
-		// Keep integration for production; configs use `enabled: import.meta.env.PROD` so local is safe.
-		// Pass SENTRY_DISABLED=1 at build time to omit the integration entirely (extra-safe for wrangler).
 		...(sentryDisabled
 			? []
 			: [
 					sentry({
+						// No client SDK — all reporting is SSR/worker via ErrorService + request middleware
+						enabled: {
+							client: false,
+							server: true
+						},
 						org: 'lucao-enterprise',
 						project: 'pesquisarr',
 						authToken: process.env.SENTRY_AUTH_TOKEN,
 						sourceMapsUploadOptions: {
 							enabled: Boolean(process.env.SENTRY_AUTH_TOKEN)
+						},
+						// Keep automatic request error/tracing on the server
+						autoInstrumentation: {
+							requestHandler: true
 						}
 					})
 				])
