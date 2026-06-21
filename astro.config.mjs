@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import { fileURLToPath } from 'node:url';
 import svelte from '@astrojs/svelte';
 import cloudflare from '@astrojs/cloudflare';
 import node from '@astrojs/node';
@@ -7,6 +8,7 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 
 const useNode = process.env.ASTRO_ADAPTER === 'node';
 const sentryDisabled = process.env.SENTRY_DISABLED === '1';
+const cfWorkersStub = fileURLToPath(new URL('./src/lib/server/cloudflare-workers-stub.ts', import.meta.url));
 
 // https://astro.build/config
 // Sentry: server-only via @sentry/astro (no @sentry/cloudflare — Astro integration covers Workers SSR).
@@ -44,6 +46,15 @@ export default defineConfig({
 				])
 	],
 	vite: {
+		// Node/Docker: `cloudflare:workers` is a workerd virtual module and does not exist for Rollup.
+		// Point it at a tiny stub so the same worker-env.ts source builds on both adapters.
+		resolve: useNode
+			? {
+					alias: {
+						'cloudflare:workers': cfWorkersStub
+					}
+				}
+			: undefined,
 		plugins: [
 			paraglideVitePlugin({
 				project: './project.inlang',

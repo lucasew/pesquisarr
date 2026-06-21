@@ -1,6 +1,6 @@
 /**
  * Access Cloudflare Worker env bindings (Astro 6+).
- * Uses `cloudflare:workers` on CF; returns {} on Node/local non-worker runtimes.
+ * Uses `cloudflare:workers` on CF; Node/Docker builds alias that specifier to a stub (see astro.config).
  */
 export async function loadWorkerEnv(): Promise<Record<string, unknown>> {
 	try {
