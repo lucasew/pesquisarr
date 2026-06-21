@@ -9,7 +9,7 @@ const useNode = process.env.ASTRO_ADAPTER === 'node';
 const sentryDisabled = process.env.SENTRY_DISABLED === '1';
 
 // https://astro.build/config
-// Sentry: server-only (no client bundle / no browser init)
+// Sentry: server-only via @sentry/astro (no @sentry/cloudflare — Astro integration covers Workers SSR).
 // https://docs.sentry.io/platforms/javascript/guides/astro/
 export default defineConfig({
 	output: 'server',
@@ -26,7 +26,7 @@ export default defineConfig({
 			? []
 			: [
 					sentry({
-						// No client SDK — all reporting is SSR/worker via ErrorService + request middleware
+						// No client/replay SDK — reporting is SSR/worker (ErrorService + request middleware)
 						enabled: {
 							client: false,
 							server: true
@@ -37,7 +37,6 @@ export default defineConfig({
 						sourceMapsUploadOptions: {
 							enabled: Boolean(process.env.SENTRY_AUTH_TOKEN)
 						},
-						// Keep automatic request error/tracing on the server
 						autoInstrumentation: {
 							requestHandler: true
 						}

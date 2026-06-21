@@ -8,7 +8,8 @@ export const GET: APIRoute = async ({ locals }) => {
 		services.search_google.healthCheck(),
 		services.search_duckduckgo.healthCheck(),
 		services.search_yandex.healthCheck(),
-		services.imdb.healthCheck()
+		services.imdb.healthCheck(),
+		services.error.healthCheck()
 	]);
 	const overallOk = healthChecks.every((check) => check.ok);
 	return json({ ok: overallOk, checks: healthChecks });
