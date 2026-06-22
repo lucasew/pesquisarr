@@ -1,4 +1,5 @@
-import type { RequestEvent } from '@sveltejs/kit';
+import type { AppEvent } from '../app-event';
+import { getRequestWorkerEnv } from '../worker-env';
 
 export interface HealthCheckResult {
 	ok: boolean;
@@ -6,9 +7,9 @@ export interface HealthCheckResult {
 }
 
 export default abstract class BaseService {
-	protected event: RequestEvent;
+	protected event: AppEvent;
 
-	constructor(event: RequestEvent) {
+	constructor(event: AppEvent) {
 		this.event = event;
 	}
 
@@ -24,7 +25,8 @@ export default abstract class BaseService {
 	}
 
 	protected get env() {
-		return this.event.platform?.env;
+		// Prefer request-scoped CF env set by middleware; never touch locals.runtime (removed in Astro 6)
+		return this.event.platform?.env ?? getRequestWorkerEnv();
 	}
 
 	protected get platform() {

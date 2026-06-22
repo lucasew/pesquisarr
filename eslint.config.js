@@ -18,7 +18,7 @@ export default [
 		}
 	},
 	{
-		files: ['**/*.svelte', '**/*.ts'],
+		files: ['**/*.svelte', '**/*.ts', '**/*.astro'],
 		languageOptions: {
 			parserOptions: {
 				parser: tseslint.parser
@@ -36,9 +36,10 @@ export default [
 			'patches',
 			'project.inlang',
 			'static',
+			'public',
 			'build',
 			'dist',
-			'.svelte-kit',
+			'.astro',
 			'src/lib/paraglide/'
 		]
 	}

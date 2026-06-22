@@ -1,4 +1,4 @@
-import type { RequestEvent } from '@sveltejs/kit';
+import type { AppEvent } from '../app-event';
 import TorrentService from './torrent';
 import DuckDuckGoService from './search/duckduckgo';
 import GoogleService from './search/google';
@@ -11,7 +11,7 @@ import HttpService from './http';
 import SuggestionsService from './suggestions';
 import ErrorService from './error';
 
-export function getServices(event: RequestEvent) {
+export function getServices(event: AppEvent) {
 	return {
 		http: new HttpService(event),
 		torrent: new TorrentService(event),
@@ -27,7 +27,7 @@ export function getServices(event: RequestEvent) {
 	};
 }
 
-export function initializeServices(event: RequestEvent) {
+export function initializeServices(event: AppEvent) {
 	if (!event.locals.services) {
 		event.locals.services = getServices(event);
 	}

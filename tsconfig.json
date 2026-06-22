@@ -1,6 +1,11 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "astro/tsconfigs/strict",
 	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"],
+			"$lib/*": ["src/lib/*"]
+		},
 		"allowJs": true,
 		"checkJs": true,
 		"esModuleInterop": true,
@@ -8,10 +13,9 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"strict": true
-	}
-	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
-	//
-	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-	// from the referenced tsconfig.json - TypeScript does not merge them in
+		"strict": true,
+		"types": ["@cloudflare/workers-types"]
+	},
+	"include": [".astro/types.d.ts", "**/*"],
+	"exclude": ["dist", "build", "node_modules"]
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
-import type { RequestEvent } from '@sveltejs/kit';
+import type { AppEvent } from '../app-event';
 import ScraperService from './index';
 import { createMockEvent } from '../test-utils';
 
@@ -14,7 +14,7 @@ type MockServices = {
 
 describe('ScraperService', () => {
 	let service: ScraperService;
-	let mockEvent: RequestEvent;
+	let mockEvent: AppEvent;
 	let mocks: MockServices;
 
 	beforeEach(() => {

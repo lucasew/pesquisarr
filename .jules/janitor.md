@@ -1,6 +1,6 @@
 ## 2024-05-23 - Unintended Changes to Auto-Generated Files
 **Issue:** A pull request with a small, focused fix also contained large, unrelated changes to an auto-generated file (`src/lib/paraglide/messages/_index.js`).
-**Root Cause:** Running `bun install` or other build-related commands can trigger scripts (like `paraglide-js compile`) that modify auto-generated files based on the current environment or dependencies. These changes are not part of the intended fix.
+**Root Cause:** Running `npm install` or other build-related commands can trigger scripts (like `paraglide-js compile`) that modify auto-generated files based on the current environment or dependencies. These changes are not part of the intended fix.
 **Solution:** After running any installation or build commands, carefully review the changed files. Revert any unintended modifications to auto-generated files before committing.
 **Pattern:** Auto-generated files, especially in i18n libraries like `paraglide-js`, are sensitive to the build environment. Always revert changes to these files if they are not directly related to the task at hand to keep commits small, focused, and reviewable.
 
@@ -11,7 +11,7 @@
 **Pattern:** For related entities (like different providers, themes, or feature flags) that share a common data structure, group their configuration into a single, structured object or map. This improves code organization, reduces boilerplate, and makes the system more scalable and maintainable.
 
 ## 2024-07-24 - Exclude Non-Code Directories from Linting
-**Issue:** The `bun lint` command was failing because `prettier` was attempting to format files in the `.jules/` directory, which contains markdown files for agent journals, not application code. This caused unnecessary CI failures and developer friction.
+**Issue:** The `npm run lint` command was failing because `prettier` was attempting to format files in the `.jules/` directory, which contains markdown files for agent journals, not application code. This caused unnecessary CI failures and developer friction.
 **Root Cause:** The `.prettierignore` file did not include the `.jules/` directory, so the linting script was checking all files in the repository, including non-code files.
 **Solution:** I added `.jules/` to the `.prettierignore` file. This tells `prettier` to skip this directory, ensuring the linting process only focuses on actual source code.
 **Pattern:** Configure linting and formatting tools to ignore non-code directories like `.jules/`, `.github/`, or documentation folders. This prevents tool-related noise and ensures that CI checks are focused on code quality.
@@ -29,7 +29,7 @@
 **Pattern:** Before implementing logic that aggregates results from multiple sources, check for existing helper functions that already provide this functionality. Reusing code improves maintainability and reduces the chance of bugs.
 
 ## 2024-07-25 - Fix Linter Formatting Issues
-**Issue:** The `bun lint` command failed due to a formatting inconsistency in `src/lib/url.ts`, blocking CI/CD pipelines and preventing developers from verifying their changes.
+**Issue:** The `npm run lint` command failed due to a formatting inconsistency in `src/lib/url.ts`, blocking CI/CD pipelines and preventing developers from verifying their changes.
 **Root Cause:** A file was committed with formatting that did not adhere to the project's Prettier configuration. This is a common issue in projects without pre-commit hooks that enforce code style.
 **Solution:** I ran `prettier --write src/lib/url.ts` to automatically correct the formatting. I then verified the fix by running the linter again, which passed.
 **Pattern:** Always run the linter and formatter before committing code. Integrating these checks into a pre-commit hook is the best way to prevent this class of issue from ever reaching the main branch.

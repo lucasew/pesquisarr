@@ -1,6 +1,7 @@
-import packagejson from '../../../../../package.json';
+import packagejson from '../../../../package.json';
+import type { APIRoute } from 'astro';
 
-export function GET() {
+export const GET: APIRoute = () => {
 	return new Response(
 		JSON.stringify({
 			id: 'com.stremio.pesquisarr.addon',
@@ -26,4 +27,4 @@ export function GET() {
 			}
 		}
 	);
-}
+};
