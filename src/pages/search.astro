@@ -12,7 +12,10 @@ if (query) {
 
 	const fetched = await Promise.all(
 		searchResults.map(async (r) => {
-			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch(() => []);
+			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch((e) => {
+				services.error.report(e, { url: r.link, message: 'fetchTorrentsInSite failed' });
+				return [];
+			});
 			return streams.map((s) => {
 				let magnet = `magnet:?xt=urn:btih:${s.infoHash}`;
 				if (s.title) {
