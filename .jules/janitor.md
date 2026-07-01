@@ -34,3 +34,4 @@
 **Solution:** I ran `prettier --write src/lib/url.ts` to automatically correct the formatting. I then verified the fix by running the linter again, which passed.
 **Pattern:** Always run the linter and formatter before committing code. Integrating these checks into a pre-commit hook is the best way to prevent this class of issue from ever reaching the main branch.
 - 2026-06-26: Always check for empty catch blocks and replace them with calls to the centralized error service (e.g., `services.error.report`) to maintain visibility into runtime failures.
+- 2026-07-01: Running `bun run check` (or `astro check`) may require manually installing `@astrojs/check` (e.g., `npm i @astrojs/check`) if it is missing and blocks execution with a prompt.
