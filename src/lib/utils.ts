@@ -1,5 +1,4 @@
-import DOMPurify, { type WindowLike } from 'dompurify';
-import { parseHTML } from 'linkedom';
+import he from 'he';
 
 export function matchFirstGroup(text: string, regex: RegExp): string[] {
 	const matches = [];
@@ -10,9 +9,6 @@ export function matchFirstGroup(text: string, regex: RegExp): string[] {
 	return matches;
 }
 
-const { window } = parseHTML('');
-const purify = DOMPurify(window as unknown as WindowLike);
-
 export function htmlSanitize(str: string): string {
-	return purify.sanitize(str);
+	return he.encode(str);
 }
