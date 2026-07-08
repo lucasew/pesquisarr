@@ -25,7 +25,8 @@ export default class HttpService extends BaseService {
 			} else {
 				headers['Sec-Fetch-Site'] = 'none';
 			}
-		} catch {
+		} catch (e) {
+			console.error('Failed to process stealth headers:', e, { url, referer: extraHeaders['Referer'] });
 			headers['Sec-Fetch-Site'] = 'none';
 		}
 

@@ -47,7 +47,8 @@ export default class TorrentService extends BaseService {
 
 			const title = he.encode(parsedURL.searchParams.get('dn') || '(NO NAME)');
 			return { infoHash, title };
-		} catch {
+		} catch (e) {
+			console.error('URL parsing failed in parseMagnet:', e, { link });
 			// Handle cases where magnet link is not a valid URL (some might be just magnet:?...)
 			if (link.startsWith('magnet:?')) {
 				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
