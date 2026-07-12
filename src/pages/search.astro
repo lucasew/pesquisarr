@@ -10,10 +10,23 @@ if (query) {
 	const { services } = Astro.locals;
 	const searchResults = await services.search.search(query);
 
+	const refererMap = new Map(searchResults.map((r) => [r.link, r.source]));
+	const rankedLinks = services.rank.rank(searchResults.map((r) => r.link));
+	// Match scraper: only scrape the best candidates to avoid rate limits and junk domains
+	const topLinks = rankedLinks.slice(0, 10);
+
+	const sourceReferers: Record<string, string> = {
+		Google: 'https://www.google.com/',
+		DuckDuckGo: 'https://duckduckgo.com/',
+		Yandex: 'https://yandex.com/'
+	};
+
 	const fetched = await Promise.all(
-		searchResults.map(async (r) => {
-			const streams = await services.scraper.fetchTorrentsInSite(r.link).catch((e) => {
-				services.error.report(e, { url: r.link, message: 'fetchTorrentsInSite failed' });
+		topLinks.map(async (url) => {
+			const source = refererMap.get(url);
+			const referer = source ? sourceReferers[source] : undefined;
+			const streams = await services.scraper.fetchTorrentsInSite(url, referer).catch((e) => {
+				services.error.report(e, { url, message: 'fetchTorrentsInSite failed' });
 				return [];
 			});
 			return streams.map((s) => {
@@ -21,7 +34,7 @@ if (query) {
 				if (s.title) {
 					magnet += `&dn=${encodeURIComponent(s.title)}`;
 				}
-				return { magnet, source: r.source };
+				return { magnet, source: source ?? '' };
 			});
 		})
 	);
