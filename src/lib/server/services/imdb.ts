@@ -30,7 +30,8 @@ export default class ImdbService extends BaseService {
 		try {
 			const title = await this.getTitleById('tt0111161'); // Shawshank Redemption
 			return { ok: title !== 'tt0111161' };
-		} catch {
+		} catch (e) {
+			console.error('IMDB healthCheck failed:', e);
 			return { ok: false, error: 'IMDB unavailable' };
 		}
 	}
