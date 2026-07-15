@@ -1,6 +1,46 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import TorrentService from './index';
+import TorrentService, { base32InfoHashToHex, normalizeInfoHash } from './index';
 import { createMockEvent } from '../test-utils';
+
+const SAMPLE_HEX = '5D41402ABC4B2A76B9719D911017C5924068B73C';
+
+/** Encode 20-byte hex to 32-char Base32 (fixture helper). */
+function hexToBase32(hex: string): string {
+	const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+	const bytes = hex.match(/.{2}/g)!.map((h) => parseInt(h, 16));
+	let bits = 0;
+	let value = 0;
+	let out = '';
+	for (const b of bytes) {
+		value = (value << 8) | b;
+		bits += 8;
+		while (bits >= 5) {
+			bits -= 5;
+			out += alphabet[(value >>> bits) & 31];
+		}
+	}
+	if (bits > 0) out += alphabet[(value << (5 - bits)) & 31];
+	return out;
+}
+
+describe('normalizeInfoHash', () => {
+	it('accepts 40-char hex (case-insensitive)', () => {
+		expect(normalizeInfoHash(SAMPLE_HEX.toLowerCase())).toBe(SAMPLE_HEX);
+	});
+
+	it('converts 32-char Base32 btih to hex', () => {
+		const b32 = hexToBase32(SAMPLE_HEX);
+		expect(b32).toHaveLength(32);
+		expect(base32InfoHashToHex(b32)).toBe(SAMPLE_HEX);
+		expect(normalizeInfoHash(b32)).toBe(SAMPLE_HEX);
+	});
+
+	it('rejects garbage', () => {
+		expect(normalizeInfoHash('short')).toBeNull();
+		expect(normalizeInfoHash('ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ')).toBeNull();
+		expect(normalizeInfoHash('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')).toBeNull();
+	});
+});
 
 describe('TorrentService', () => {
 	let service: TorrentService;
@@ -11,10 +51,10 @@ describe('TorrentService', () => {
 
 	describe('parseMagnet', () => {
 		it('should parse a valid magnet link', () => {
-			const magnet = 'magnet:?xt=urn:btih:5D41402ABC4B2A76B9719D911017C5924068B73C&dn=test-torrent';
+			const magnet = `magnet:?xt=urn:btih:${SAMPLE_HEX}&dn=test-torrent`;
 			const result = service.parseMagnet(magnet);
 			expect(result).not.toBeNull();
-			expect(result?.infoHash).toBe('5D41402ABC4B2A76B9719D911017C5924068B73C');
+			expect(result?.infoHash).toBe(SAMPLE_HEX);
 			expect(result?.title).toBe('test-torrent');
 		});
 
@@ -24,10 +64,18 @@ describe('TorrentService', () => {
 		});
 
 		it('should handle magnets without dn parameter', () => {
-			const magnet = 'magnet:?xt=urn:btih:5D41402ABC4B2A76B9719D911017C5924068B73C';
+			const magnet = `magnet:?xt=urn:btih:${SAMPLE_HEX}`;
 			const result = service.parseMagnet(magnet);
-			expect(result?.infoHash).toBe('5D41402ABC4B2A76B9719D911017C5924068B73C');
+			expect(result?.infoHash).toBe(SAMPLE_HEX);
 			expect(result?.title).toBe('(NO NAME)');
+		});
+
+		it('should convert Base32 btih magnets to hex', () => {
+			const b32 = hexToBase32(SAMPLE_HEX);
+			const magnet = `magnet:?xt=urn:btih:${b32}&dn=base32-torrent`;
+			const result = service.parseMagnet(magnet);
+			expect(result?.infoHash).toBe(SAMPLE_HEX);
+			expect(result?.title).toBe('base32-torrent');
 		});
 	});
 });
