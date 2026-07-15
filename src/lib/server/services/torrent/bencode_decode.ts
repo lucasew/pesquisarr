@@ -1,4 +1,5 @@
 // stolen from: https://raw.githubusercontent.com/Chocobo1/bencode_online/master/src/bencode/decode.js
+// Refactored to keep decode cursor/state per call (safe under concurrent Workers requests).
 
 const INTEGER_START = 0x69; // 'i'
 const STRING_DELIM = 0x3a; // ':'
@@ -50,6 +51,109 @@ function getIntFromBuffer(buffer, start, end) {
 	return sum * sign;
 }
 
+/** Per-decode cursor and buffer — not shared across concurrent calls. */
+class Decoder {
+	/**
+	 * @param {Buffer} data
+	 * @param {String|null} encoding
+	 */
+	constructor(data, encoding) {
+		this.position = 0;
+		this.encoding = encoding || null;
+		this.data = data;
+		this.bytes = data.length;
+	}
+
+	next() {
+		switch (this.data[this.position]) {
+			case DICTIONARY_START:
+				return this.dictionary();
+			case LIST_START:
+				return this.list();
+			case INTEGER_START:
+				return this.integer();
+			default:
+				return String(this.buffer());
+		}
+	}
+
+	find(chr) {
+		let i = this.position;
+		const c = this.data.length;
+		const d = this.data;
+
+		while (i < c) {
+			if (d[i] === chr) return i;
+			i++;
+		}
+
+		throw new Error(
+			'Invalid data: Missing delimiter "' +
+				String.fromCharCode(chr) +
+				'" [0x' +
+				chr.toString(16) +
+				']'
+		);
+	}
+
+	dictionary() {
+		this.position++;
+
+		const dict = {};
+
+		while (this.data[this.position] !== END_OF_TYPE) {
+			const key = this.buffer();
+			const from = this.position;
+			dict[key] = this.next();
+			const to = this.position;
+			if (String(key) === 'info') {
+				dict['infohashFrom'] = from;
+				dict['infohashTo'] = to;
+			}
+		}
+
+		this.position++;
+
+		return dict;
+	}
+
+	list() {
+		this.position++;
+
+		const lst = [];
+
+		while (this.data[this.position] !== END_OF_TYPE) {
+			lst.push(this.next());
+		}
+
+		this.position++;
+
+		return lst;
+	}
+
+	integer() {
+		const end = this.find(END_OF_TYPE);
+		const number = getIntFromBuffer(this.data, this.position + 1, end);
+
+		this.position += end + 1 - this.position;
+
+		return number;
+	}
+
+	buffer() {
+		let sep = this.find(STRING_DELIM);
+		const length = getIntFromBuffer(this.data, this.position, sep);
+		sep++;
+		const end = sep + length;
+
+		this.position = end;
+
+		return this.encoding
+			? this.data.toString(this.encoding, sep, end)
+			: this.data.slice(sep, end);
+	}
+}
+
 /**
  * Decodes bencoded data.
  *
@@ -74,108 +178,9 @@ function decode(data, start, end, encoding) {
 		end = undefined;
 	}
 
-	decode.position = 0;
-	decode.encoding = encoding || null;
+	const buf = !Buffer.isBuffer(data) ? Buffer.from(data) : data.slice(start, end);
 
-	decode.data = !Buffer.isBuffer(data) ? Buffer.from(data) : data.slice(start, end);
-
-	decode.bytes = decode.data.length;
-
-	return decode.next();
+	return new Decoder(buf, encoding).next();
 }
-
-decode.bytes = 0;
-decode.position = 0;
-decode.data = null;
-decode.encoding = null;
-
-decode.next = function () {
-	switch (decode.data[decode.position]) {
-		case DICTIONARY_START:
-			return decode.dictionary();
-		case LIST_START:
-			return decode.list();
-		case INTEGER_START:
-			return decode.integer();
-		default:
-			return String(decode.buffer());
-	}
-};
-
-decode.find = function (chr) {
-	let i = decode.position;
-	const c = decode.data.length;
-	const d = decode.data;
-
-	while (i < c) {
-		if (d[i] === chr) return i;
-		i++;
-	}
-
-	throw new Error(
-		'Invalid data: Missing delimiter "' +
-			String.fromCharCode(chr) +
-			'" [0x' +
-			chr.toString(16) +
-			']'
-	);
-};
-
-decode.dictionary = function () {
-	decode.position++;
-
-	const dict = {};
-
-	while (decode.data[decode.position] !== END_OF_TYPE) {
-		const key = decode.buffer();
-		const from = decode.position;
-		dict[key] = decode.next();
-		const to = decode.position;
-		if (String(key) === 'info') {
-			dict['infohashFrom'] = from;
-			dict['infohashTo'] = to;
-		}
-	}
-
-	decode.position++;
-
-	return dict;
-};
-
-decode.list = function () {
-	decode.position++;
-
-	const lst = [];
-
-	while (decode.data[decode.position] !== END_OF_TYPE) {
-		lst.push(decode.next());
-	}
-
-	decode.position++;
-
-	return lst;
-};
-
-decode.integer = function () {
-	const end = decode.find(END_OF_TYPE);
-	const number = getIntFromBuffer(decode.data, decode.position + 1, end);
-
-	decode.position += end + 1 - decode.position;
-
-	return number;
-};
-
-decode.buffer = function () {
-	let sep = decode.find(STRING_DELIM);
-	const length = getIntFromBuffer(decode.data, decode.position, sep);
-	sep++;
-	const end = sep + length;
-
-	decode.position = end;
-
-	return decode.encoding
-		? decode.data.toString(decode.encoding, sep, end)
-		: decode.data.slice(sep, end);
-};
 
 export default decode;
