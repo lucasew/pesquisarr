@@ -7,6 +7,78 @@ export interface TorrentStream {
 	title: string;
 }
 
+/** RFC 4648 Base32 alphabet (BitTorrent btih 32-char form). */
+const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+/** Decode a 32-char Base32 infohash to 40-char uppercase hex. */
+export function base32InfoHashToHex(base32: string): string | null {
+	const input = base32.toUpperCase().replace(/=+$/, '');
+	if (input.length !== 32 || !/^[A-Z2-7]+$/.test(input)) {
+		return null;
+	}
+
+	let bits = 0;
+	let value = 0;
+	const bytes: number[] = [];
+
+	for (const ch of input) {
+		const idx = BASE32_ALPHABET.indexOf(ch);
+		if (idx < 0) return null;
+		value = (value << 5) | idx;
+		bits += 5;
+		if (bits >= 8) {
+			bits -= 8;
+			bytes.push((value >>> bits) & 0xff);
+		}
+	}
+
+	// SHA-1 is 20 bytes; reject if we did not get exactly that
+	if (bytes.length !== 20) return null;
+
+	return bytes.map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+/** Normalize btih to 40-char uppercase hex (accepts hex or Base32). */
+export function normalizeInfoHash(raw: string): string | null {
+	const upper = raw.toUpperCase();
+	if (upper.length === 40 && /^[0-9A-F]+$/.test(upper)) {
+		return upper;
+	}
+	if (upper.length === 32) {
+		return base32InfoHashToHex(upper);
+	}
+	return null;
+}
+
+function extractXt(link: string): string | null {
+	try {
+		const parsedURL = new URL(link);
+		const xt = parsedURL.searchParams.get('xt');
+		if (!xt) return null;
+		return xt.replace(/^urn:/i, '').replace(/^btih:/i, '');
+	} catch {
+		const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
+		return xtMatch ? xtMatch[1] : null;
+	}
+}
+
+function extractDn(link: string): string {
+	try {
+		const parsedURL = new URL(link);
+		return parsedURL.searchParams.get('dn') || '(NO NAME)';
+	} catch {
+		const dnMatch = link.match(/[?&]dn=([^&]*)/i);
+		if (dnMatch) {
+			try {
+				return decodeURIComponent(dnMatch[1]);
+			} catch {
+				return dnMatch[1];
+			}
+		}
+		return '(NO NAME)';
+	}
+}
+
 export default class TorrentService extends BaseService {
 	async decodeTorrent(torrent: ArrayBuffer): Promise<TorrentStream | null> {
 		try {
@@ -33,34 +105,14 @@ export default class TorrentService extends BaseService {
 
 	parseMagnet(link: string): TorrentStream | null {
 		try {
-			const parsedURL = new URL(link);
-			let infoHash = parsedURL.searchParams.get('xt');
-			if (infoHash) {
-				infoHash = infoHash.replace('urn:', '').replace('btih:', '');
-			}
-			if (!infoHash || (infoHash.length !== 40 && infoHash.length !== 32)) {
-				return null;
-			}
-			// If it's Base32 (32 chars), it should ideally be converted to Hex (40 chars)
-			// For now, let's keep it simple and ensure it's uppercase
-			infoHash = infoHash.toUpperCase();
-
-			const title = he.encode(parsedURL.searchParams.get('dn') || '(NO NAME)');
+			const rawHash = extractXt(link);
+			if (!rawHash) return null;
+			const infoHash = normalizeInfoHash(rawHash);
+			if (!infoHash) return null;
+			const title = he.encode(extractDn(link));
 			return { infoHash, title };
 		} catch (e) {
-			console.error('URL parsing failed in parseMagnet:', e, { link });
-			// Handle cases where magnet link is not a valid URL (some might be just magnet:?...)
-			if (link.startsWith('magnet:?')) {
-				const xtMatch = link.match(/xt=urn:btih:([^&]*)/i);
-				const dnMatch = link.match(/dn=([^&]*)/i);
-				if (xtMatch) {
-					const infoHash = xtMatch[1].toUpperCase();
-					const title = dnMatch ? he.encode(decodeURIComponent(dnMatch[1])) : '(NO NAME)';
-					if (infoHash.length === 40 || infoHash.length === 32) {
-						return { infoHash, title };
-					}
-				}
-			}
+			this.services.error.report(e, { link, message: 'URL parsing failed in parseMagnet' });
 			return null;
 		}
 	}
