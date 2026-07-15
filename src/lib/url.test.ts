@@ -48,4 +48,17 @@ describe('isValidHttpUrl', () => {
 		expect(isValidHttpUrl('http://[fe80::a00:27ff:fe4e:66a1]')).toBe(false);
 		expect(isValidHttpUrl('http://[febf:ffff::1]')).toBe(false);
 	});
+
+	it('should return false for full IPv6 unique local range fc00::/7', () => {
+		// Previously only fd00::/8 was blocked; fc00::/8 is also ULA (fc00::/7).
+		expect(isValidHttpUrl('http://[fc00::1]')).toBe(false);
+		expect(isValidHttpUrl('http://[fcff:ffff::1]')).toBe(false);
+		expect(isValidHttpUrl('http://[fd00::1]')).toBe(false);
+		expect(isValidHttpUrl('http://[fd12:3456::1]')).toBe(false);
+	});
+
+	it('should return true for non-ULA public IPv6', () => {
+		expect(isValidHttpUrl('http://[2001:db8::1]')).toBe(true);
+		expect(isValidHttpUrl('https://[2606:4700:4700::1111]')).toBe(true);
+	});
 });
