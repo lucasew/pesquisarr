@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Download } from 'lucide-svelte';
-	export let torrent: string;
 
-	const torrentURL = new URL(torrent);
+	let { torrent }: { torrent: string } = $props();
+
+	const torrentURL = $derived(new URL(torrent));
 </script>
 
 <div class="card bg-base-100 shadow-sm border border-base-content/10 mb-3">

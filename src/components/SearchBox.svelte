@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
 
-	export let suggestion = '';
+	let { suggestion = '' }: { suggestion?: string } = $props();
 
-	let query = '';
+	let query = $state('');
 
 	function handleSearch(event: Event) {
 		event.preventDefault();
@@ -13,7 +13,7 @@
 	}
 </script>
 
-<form on:submit={handleSearch} class="w-full max-w-2xl">
+<form onsubmit={handleSearch} class="w-full max-w-2xl">
 	<div
 		class="join w-full rounded-full overflow-hidden border border-base-content/10 focus-within:border-base-content/50 transition-all"
 	>

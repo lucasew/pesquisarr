@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Sun, Moon } from 'lucide-svelte';
 
-	let isDark = false;
+	let isDark = $state(false);
 
 	onMount(() => {
 		// Check saved theme preference or default to light
@@ -19,7 +19,7 @@
 	}
 </script>
 
-<button on:click={toggleTheme} aria-label="Toggle theme" class="btn btn-ghost btn-circle">
+<button onclick={toggleTheme} aria-label="Toggle theme" class="btn btn-ghost btn-circle">
 	{#if isDark}
 		<Sun size={24} />
 	{:else}
