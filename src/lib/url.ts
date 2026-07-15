@@ -27,7 +27,8 @@ export function isValidHttpUrl(url: string): boolean {
 			/^169\.254\./, // IPv4 link-local: 169.254.0.0/16 (includes cloud metadata 169.254.169.254)
 			/^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./, // IPv4 CGNAT: 100.64.0.0/10
 			/^::1$/, // IPv6 loopback: ::1
-			/^fd[0-9a-f]{2}:/i, // IPv6 unique local addresses: fc00::/7
+			// IPv6 unique local addresses: fc00::/7 (covers both fc00::/8 and fd00::/8)
+			/^f[cd][0-9a-f]{2}:/i,
 			/^fe[89ab][0-9a-f]:/i // IPv6 link-local: fe80::/10
 		];
 
