@@ -4,9 +4,36 @@ import type { TorrentStream } from '../torrent';
 import { isValidHttpUrl } from '$lib/url';
 
 export const REGEX_MATCH_MAGNET = /(magnet:[^"' ]*)/g;
-export const REGEX_MATCH_INFOHASH = /[0-9A-F]{40}/i;
+
+/** True when the first non-whitespace byte can start a bencode value (dict/list/int/string). */
+export function isLikelyBencode(data: ArrayBuffer): boolean {
+	const bytes = new Uint8Array(data);
+	let i = 0;
+	while (
+		i < bytes.length &&
+		(bytes[i] === 0x09 || bytes[i] === 0x0a || bytes[i] === 0x0d || bytes[i] === 0x20)
+	) {
+		i++;
+	}
+	if (i >= bytes.length) return false;
+	const c = bytes[i];
+	// 'd' | 'l' | 'i' | '0'-'9' (string length prefix)
+	return c === 0x64 || c === 0x6c || c === 0x69 || (c >= 0x30 && c <= 0x39);
+}
+
+function isTorrentFileUrl(url: string): boolean {
+	// Match .torrent before query/hash so CDNs with signed URLs still count
+	return /\.torrent(\?|#|$)/i.test(url);
+}
 
 export default class ScraperService extends BaseService {
+	private magnetsFromText(text: string): TorrentStream[] {
+		const magnets = matchFirstGroup(text, REGEX_MATCH_MAGNET);
+		return magnets
+			.map((m) => this.services.torrent.parseMagnet(m))
+			.filter((s): s is TorrentStream => s !== null);
+	}
+
 	async fetchTorrentsInSite(url: string, referer?: string): Promise<TorrentStream[]> {
 		if (!isValidHttpUrl(url)) {
 			return [];
@@ -17,24 +44,30 @@ export default class ScraperService extends BaseService {
 				extraHeaders['Referer'] = referer;
 			}
 			const response = await this.services.http.fetch(url, 2 * 3600, extraHeaders);
-			const contentType = response.headers.get('Content-Type') || '';
-			if (
+			const contentType = (response.headers.get('Content-Type') || '').toLowerCase();
+
+			// Binary torrent path: explicit Content-Type or .torrent URL.
+			// Do NOT treat "40 hex chars appear in the URL" as a torrent file — index HTML
+			// pages commonly embed the infohash in the path; feeding that HTML to the
+			// bencode decoder yields Sentry noise (buffer[0]=60 / '<').
+			const preferBinary =
 				contentType.includes('application/x-bittorrent') ||
-				url.search(REGEX_MATCH_INFOHASH) !== -1 ||
-				url.endsWith('.torrent')
-			) {
+				contentType.includes('application/octet-stream') ||
+				isTorrentFileUrl(url);
+
+			if (preferBinary) {
 				const arrayBuffer = await response.arrayBuffer();
-				const stream = await this.services.torrent.decodeTorrent(arrayBuffer);
-				return stream ? [stream] : [];
-			} else if (contentType.includes('application/octet-stream')) {
-				return [];
-			} else {
-				const text = await response.text();
-				const magnets = matchFirstGroup(text, REGEX_MATCH_MAGNET);
-				return magnets
-					.map((m) => this.services.torrent.parseMagnet(m))
-					.filter((s): s is TorrentStream => s !== null);
+				if (isLikelyBencode(arrayBuffer)) {
+					const stream = await this.services.torrent.decodeTorrent(arrayBuffer);
+					return stream ? [stream] : [];
+				}
+				// Mislabelled HTML/error page (or empty): recover magnets without decoding as torrent
+				const text = new TextDecoder('utf-8', { fatal: false }).decode(arrayBuffer);
+				return this.magnetsFromText(text);
 			}
+
+			const text = await response.text();
+			return this.magnetsFromText(text);
 		} catch (e) {
 			this.services.error.report(e, { url, message: 'Error fetching torrents' });
 			return [];
