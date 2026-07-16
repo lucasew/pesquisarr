@@ -19,7 +19,15 @@ export default class ImdbService extends BaseService {
 				`https://www.imdb.com/title/${imdbId}`,
 				3600 * 24
 			);
-			return htmlSanitize(matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE)[0]);
+			// matchFirstGroup may return []; [0] is undefined and htmlSanitize(undefined)
+			// yields the non-empty string "<!-->", which would pass healthCheck and
+			// turn scrapes into searches for "<!--> torrent".
+			const titles = matchFirstGroup(responseText, this.REGEX_IMDB_MATCH_TITLE);
+			const title = titles[0]?.trim();
+			if (!title) {
+				throw new Error(`IMDB title not found in page for ${imdbId}`);
+			}
+			return htmlSanitize(title);
 		} catch (e) {
 			this.services.error.report(e, { imdbId, message: 'IMDB title fetch failed' });
 			return htmlSanitize(imdbId);
