@@ -50,6 +50,16 @@ export function normalizeInfoHash(raw: string): string | null {
 	return null;
 }
 
+/**
+ * Magnets scraped from HTML often keep entity-encoded separators
+ * (`&amp;` between query params). `URLSearchParams` then treats
+ * `amp;dn` as a key name and drops `dn` / `tr`. Decode entities first
+ * so param boundaries match a real magnet URI.
+ */
+export function normalizeMagnetLink(link: string): string {
+	return he.decode(link.trim());
+}
+
 function extractXt(link: string): string | null {
 	try {
 		const parsedURL = new URL(link);
@@ -105,11 +115,13 @@ export default class TorrentService extends BaseService {
 
 	parseMagnet(link: string): TorrentStream | null {
 		try {
-			const rawHash = extractXt(link);
+			const magnet = normalizeMagnetLink(link);
+			const rawHash = extractXt(magnet);
 			if (!rawHash) return null;
 			const infoHash = normalizeInfoHash(rawHash);
 			if (!infoHash) return null;
-			const title = he.encode(extractDn(link));
+			// Encode for HTML/JSON consumers; input entities were already normalized above.
+			const title = he.encode(extractDn(magnet));
 			return { infoHash, title };
 		} catch (e) {
 			this.services.error.report(e, { link, message: 'URL parsing failed in parseMagnet' });
