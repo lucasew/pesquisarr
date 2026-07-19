@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import TorrentService, { base32InfoHashToHex, normalizeInfoHash } from './index';
+import TorrentService, {
+	base32InfoHashToHex,
+	normalizeInfoHash,
+	normalizeMagnetLink
+} from './index';
 import { createMockEvent } from '../test-utils';
 
 const SAMPLE_HEX = '5D41402ABC4B2A76B9719D911017C5924068B73C';
@@ -76,6 +80,21 @@ describe('TorrentService', () => {
 			const result = service.parseMagnet(magnet);
 			expect(result?.infoHash).toBe(SAMPLE_HEX);
 			expect(result?.title).toBe('base32-torrent');
+		});
+
+		it('recovers dn when HTML entity separators were scraped', () => {
+			// href="magnet:?xt=…&amp;dn=…" in raw HTML keeps &amp; as text.
+			const magnet = `magnet:?xt=urn:btih:${SAMPLE_HEX}&amp;dn=Test%20Movie&amp;tr=http%3A%2F%2Ftracker.example%2Fannounce`;
+			const result = service.parseMagnet(magnet);
+			expect(result).not.toBeNull();
+			expect(result?.infoHash).toBe(SAMPLE_HEX);
+			expect(result?.title).toBe('Test Movie');
+		});
+
+		it('still parses plain magnets after entity normalization', () => {
+			const magnet = `magnet:?xt=urn:btih:${SAMPLE_HEX}&dn=plain`;
+			expect(normalizeMagnetLink(magnet)).toBe(magnet);
+			expect(service.parseMagnet(magnet)?.title).toBe('plain');
 		});
 	});
 });
