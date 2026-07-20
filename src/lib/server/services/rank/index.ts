@@ -9,8 +9,26 @@ function rankScore(link: string): [number, number, number] {
 	return [torrent, free, lengthPenalty];
 }
 
+/** Escape a domain/keyword so dots and other metacharacters match literally. */
+export function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Build the ignore matcher from configured domains/keywords.
+ * Patterns are joined with `|` after escaping so e.g. `youtube.com` does not
+ * match `youtubexcom` (`.` as "any character").
+ */
+export function buildIgnoredDomainRegex(domains: string[]): RegExp {
+	if (domains.length === 0) {
+		// Match nothing; used only if config is emptied.
+		return /(?!)/;
+	}
+	return new RegExp(domains.map(escapeRegExp).join('|'), 'i');
+}
+
 export default class RankService extends BaseService {
-	private regexIgnored = new RegExp(data.ignoredDomains.join('|'), 'i');
+	private regexIgnored = buildIgnoredDomainRegex(data.ignoredDomains);
 
 	isIgnored(link: string): boolean {
 		return this.regexIgnored.test(link);
