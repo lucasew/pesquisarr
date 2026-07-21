@@ -2,9 +2,12 @@ import BaseService from '../base';
 import data from './data.json';
 
 function rankScore(link: string): [number, number, number] {
-	// Prefer torrent in URL, penalize "free", then longer URLs as tiebreaker
-	const torrent = link.includes('torrent') ? 0 : 1;
-	const free = link.includes('free') ? 1 : 0;
+	// Prefer "torrent" in URL, penalize "free", then longer URLs as tiebreaker.
+	// Compare lowercased so e.g. `/Torrent/` and `/Free-Download` score like their
+	// lowercase counterparts (path casing varies a lot across indexers).
+	const lower = link.toLowerCase();
+	const torrent = lower.includes('torrent') ? 0 : 1;
+	const free = lower.includes('free') ? 1 : 0;
 	const lengthPenalty = -link.length;
 	return [torrent, free, lengthPenalty];
 }
