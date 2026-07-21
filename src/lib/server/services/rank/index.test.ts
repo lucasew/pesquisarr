@@ -53,4 +53,20 @@ describe('RankService', () => {
 		expect(result[0]).toBe('https://example.com/movie-torrent-download');
 		expect(result).not.toContain('https://youtube.com/watch?v=123');
 	});
+
+	it('ranks torrent/free keywords case-insensitively', () => {
+		// Indexer paths often use Title Case; case-sensitive includes() would demote
+		// real torrent URLs and miss Free-download spam.
+		const links = [
+			'https://example.com/Movie',
+			'https://example.com/Movie/Torrent/File',
+			'https://example.com/Free-Download/Movie'
+		];
+		const result = service.rank(links);
+		expect(result[0]).toBe('https://example.com/Movie/Torrent/File');
+		// "Free" is penalized vs plain movie (same torrent-score tier)
+		const freeIdx = result.indexOf('https://example.com/Free-Download/Movie');
+		const plainIdx = result.indexOf('https://example.com/Movie');
+		expect(freeIdx).toBeGreaterThan(plainIdx);
+	});
 });
