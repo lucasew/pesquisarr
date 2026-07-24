@@ -99,5 +99,19 @@ export async function handleStremioStream({ params, locals }: AppEvent) {
 		streams = preferEpisodeStreams(streams, parsed.season, parsed.episode);
 	}
 
-	return json({ streams });
+	// Stremio accepts optional `sources` as tracker:/dht: entries for peer discovery.
+	const stremioStreams = streams.map(({ infoHash, title, trackers }) => {
+		const base: { infoHash: string; title: string; sources?: string[] } = {
+			infoHash,
+			title
+		};
+		if (trackers.length > 0) {
+			base.sources = trackers.map((tr) =>
+				tr.startsWith('tracker:') || tr.startsWith('dht:') ? tr : `tracker:${tr}`
+			);
+		}
+		return base;
+	});
+
+	return json({ streams: stremioStreams });
 }

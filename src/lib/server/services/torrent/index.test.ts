@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import TorrentService, {
 	base32InfoHashToHex,
+	buildMagnetLink,
+	extractTrackers,
 	normalizeInfoHash,
-	normalizeMagnetLink
+	normalizeMagnetLink,
+	trackersFromTorrentMeta
 } from './index';
 import { createMockEvent } from '../test-utils';
 
 const SAMPLE_HEX = '5D41402ABC4B2A76B9719D911017C5924068B73C';
+const SAMPLE_TRACKER = 'http://tracker.example/announce';
 
 /** Encode 20-byte hex to 32-char Base32 (fixture helper). */
 function hexToBase32(hex: string): string {
@@ -89,6 +93,7 @@ describe('TorrentService', () => {
 			expect(result).not.toBeNull();
 			expect(result?.infoHash).toBe(SAMPLE_HEX);
 			expect(result?.title).toBe('Test Movie');
+			expect(result?.trackers).toEqual([SAMPLE_TRACKER]);
 		});
 
 		it('still parses plain magnets after entity normalization', () => {
@@ -96,5 +101,38 @@ describe('TorrentService', () => {
 			expect(normalizeMagnetLink(magnet)).toBe(magnet);
 			expect(service.parseMagnet(magnet)?.title).toBe('plain');
 		});
+
+		it('preserves unique tr= trackers from the magnet', () => {
+			const magnet = `magnet:?xt=urn:btih:${SAMPLE_HEX}&dn=t&tr=${encodeURIComponent(SAMPLE_TRACKER)}&tr=${encodeURIComponent(SAMPLE_TRACKER)}&tr=${encodeURIComponent('udp://other.example:80')}`;
+			const result = service.parseMagnet(magnet);
+			expect(result?.trackers).toEqual([SAMPLE_TRACKER, 'udp://other.example:80']);
+		});
+
+		it('returns empty trackers when tr= is absent', () => {
+			const magnet = `magnet:?xt=urn:btih:${SAMPLE_HEX}&dn=no-trackers`;
+			expect(service.parseMagnet(magnet)?.trackers).toEqual([]);
+		});
+	});
+});
+
+describe('extractTrackers / buildMagnetLink / trackersFromTorrentMeta', () => {
+	it('round-trips trackers through buildMagnetLink', () => {
+		const magnet = buildMagnetLink({
+			infoHash: SAMPLE_HEX,
+			title: 'Name',
+			trackers: [SAMPLE_TRACKER, 'udp://b.example']
+		});
+		expect(extractTrackers(magnet)).toEqual([SAMPLE_TRACKER, 'udp://b.example']);
+		expect(magnet).toContain(`xt=urn:btih:${SAMPLE_HEX}`);
+		expect(magnet).toContain(`dn=${encodeURIComponent('Name')}`);
+	});
+
+	it('flattens announce and announce-list from torrent meta', () => {
+		expect(
+			trackersFromTorrentMeta({
+				announce: SAMPLE_TRACKER,
+				'announce-list': [[SAMPLE_TRACKER, 'udp://tier1'], ['http://tier2']]
+			})
+		).toEqual([SAMPLE_TRACKER, 'udp://tier1', 'http://tier2']);
 	});
 });

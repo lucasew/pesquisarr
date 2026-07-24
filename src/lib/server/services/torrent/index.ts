@@ -5,6 +5,8 @@ import decodeBencode from './bencode_decode';
 export interface TorrentStream {
 	infoHash: string;
 	title: string;
+	/** Announce URLs from `tr=` (magnets) or announce/announce-list (.torrent). */
+	trackers: string[];
 }
 
 /** RFC 4648 Base32 alphabet (BitTorrent btih 32-char form). */
@@ -89,6 +91,86 @@ function extractDn(link: string): string {
 	}
 }
 
+/** Collect unique non-empty `tr=` tracker URLs from a magnet URI. */
+export function extractTrackers(link: string): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+
+	const push = (raw: string) => {
+		const tracker = raw.trim();
+		if (!tracker || seen.has(tracker)) return;
+		seen.add(tracker);
+		out.push(tracker);
+	};
+
+	try {
+		const parsedURL = new URL(link);
+		for (const tr of parsedURL.searchParams.getAll('tr')) {
+			push(tr);
+		}
+		return out;
+	} catch {
+		// Fallback when URL() rejects the magnet (malformed but still scrapable).
+		const re = /[?&]tr=([^&]*)/gi;
+		let m: RegExpExecArray | null;
+		while ((m = re.exec(link)) !== null) {
+			try {
+				push(decodeURIComponent(m[1]));
+			} catch {
+				push(m[1]);
+			}
+		}
+		return out;
+	}
+}
+
+/**
+ * Announce list from a decoded .torrent: top-level `announce` plus nested
+ * `announce-list` tiers (BEP 12).
+ */
+export function trackersFromTorrentMeta(meta: {
+	announce?: unknown;
+	'announce-list'?: unknown;
+}): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+
+	const push = (value: unknown) => {
+		if (typeof value !== 'string') return;
+		const tracker = value.trim();
+		if (!tracker || seen.has(tracker)) return;
+		seen.add(tracker);
+		out.push(tracker);
+	};
+
+	push(meta.announce);
+
+	const list = meta['announce-list'];
+	if (Array.isArray(list)) {
+		for (const tier of list) {
+			if (Array.isArray(tier)) {
+				for (const entry of tier) push(entry);
+			} else {
+				push(tier);
+			}
+		}
+	}
+
+	return out;
+}
+
+/** Rebuild a magnet from a parsed stream (infohash, display name, trackers). */
+export function buildMagnetLink(stream: Pick<TorrentStream, 'infoHash' | 'title' | 'trackers'>): string {
+	let magnet = `magnet:?xt=urn:btih:${stream.infoHash}`;
+	if (stream.title) {
+		magnet += `&dn=${encodeURIComponent(stream.title)}`;
+	}
+	for (const tr of stream.trackers) {
+		magnet += `&tr=${encodeURIComponent(tr)}`;
+	}
+	return magnet;
+}
+
 export default class TorrentService extends BaseService {
 	async decodeTorrent(torrent: ArrayBuffer): Promise<TorrentStream | null> {
 		try {
@@ -105,7 +187,8 @@ export default class TorrentService extends BaseService {
 
 			return {
 				infoHash: hexDigest,
-				title
+				title,
+				trackers: trackersFromTorrentMeta(unbencode)
 			};
 		} catch (e) {
 			this.services.error.report(e, { message: 'Failed to decode torrent bencode' });
@@ -122,7 +205,7 @@ export default class TorrentService extends BaseService {
 			if (!infoHash) return null;
 			// Encode for HTML/JSON consumers; input entities were already normalized above.
 			const title = he.encode(extractDn(magnet));
-			return { infoHash, title };
+			return { infoHash, title, trackers: extractTrackers(magnet) };
 		} catch (e) {
 			this.services.error.report(e, { link, message: 'URL parsing failed in parseMagnet' });
 			return null;

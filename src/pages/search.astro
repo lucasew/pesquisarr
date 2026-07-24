@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import SearchBar from '../components/SearchBar.svelte';
 import TorrentCard from '../components/TorrentCard.svelte';
+import { buildMagnetLink, type TorrentStream } from '../lib/server/services/torrent';
 
 const query = Astro.url.searchParams.get('query');
 let links: { torrent: string; source: string }[] = [];
@@ -27,24 +28,35 @@ if (query) {
 			const referer = source ? sourceReferers[source] : undefined;
 			const streams = await services.scraper.fetchTorrentsInSite(url, referer).catch((e) => {
 				services.error.report(e, { url, message: 'fetchTorrentsInSite failed' });
-				return [];
+				return [] as TorrentStream[];
 			});
-			return streams.map((s) => {
-				let magnet = `magnet:?xt=urn:btih:${s.infoHash}`;
-				if (s.title) {
-					magnet += `&dn=${encodeURIComponent(s.title)}`;
-				}
-				return { magnet, source: source ?? '' };
-			});
+			return streams.map((s) => ({ stream: s, source: source ?? '' }));
 		})
 	);
 
-	const entries = fetched.flat();
-	const map = new Map<string, string>();
-	for (const { magnet, source } of entries) {
-		if (!map.has(magnet)) map.set(magnet, source);
+	// Dedupe by infoHash and union trackers so the UI keeps announce URLs.
+	const byHash = new Map<string, { stream: TorrentStream; source: string }>();
+	for (const { stream, source } of fetched.flat()) {
+		const existing = byHash.get(stream.infoHash);
+		if (!existing) {
+			byHash.set(stream.infoHash, {
+				stream: { ...stream, trackers: [...stream.trackers] },
+				source
+			});
+			continue;
+		}
+		const seen = new Set(existing.stream.trackers);
+		for (const tr of stream.trackers) {
+			if (!seen.has(tr)) {
+				seen.add(tr);
+				existing.stream.trackers.push(tr);
+			}
+		}
 	}
-	links = Array.from(map.entries()).map(([torrent, source]) => ({ torrent, source }));
+	links = Array.from(byHash.values()).map(({ stream, source }) => ({
+		torrent: buildMagnetLink(stream),
+		source
+	}));
 }
 
 const pageTitle = query ? `${query} - pesquisarr` : 'pesquisarr';
