@@ -71,9 +71,9 @@ describe('episodeNameTags', () => {
 
 describe('preferEpisodeStreams', () => {
 	const streams: TorrentStream[] = [
-		{ infoHash: 'A', title: 'Show.S02E01.720p' },
-		{ infoHash: 'B', title: 'Show.S01E05.1080p' },
-		{ infoHash: 'C', title: 'Show Season Pack' }
+		{ infoHash: 'A', title: 'Show.S02E01.720p', trackers: [] },
+		{ infoHash: 'B', title: 'Show.S01E05.1080p', trackers: [] },
+		{ infoHash: 'C', title: 'Show Season Pack', trackers: [] }
 	];
 
 	it('moves matching episode titles first', () => {
@@ -88,8 +88,8 @@ describe('preferEpisodeStreams', () => {
 
 	it('matches unpadded tags like 1x5', () => {
 		const withUnpadded: TorrentStream[] = [
-			{ infoHash: 'X', title: 'Show.1x5.WEB' },
-			{ infoHash: 'Y', title: 'Show.S02E01' }
+			{ infoHash: 'X', title: 'Show.1x5.WEB', trackers: [] },
+			{ infoHash: 'Y', title: 'Show.S02E01', trackers: [] }
 		];
 		expect(preferEpisodeStreams(withUnpadded, 1, 5).map((s) => s.infoHash)).toEqual([
 			'X',
@@ -104,7 +104,9 @@ describe('handleStremioStream', () => {
 
 	beforeEach(() => {
 		event = createMockEvent();
-		getTorrentStreams = vi.fn().mockResolvedValue([{ infoHash: 'ABC', title: 't' }]);
+		getTorrentStreams = vi.fn().mockResolvedValue([
+			{ infoHash: 'ABC', title: 't', trackers: ['http://tracker.example/announce'] }
+		]);
 		event.locals.services = {
 			scraper: { getTorrentStreams }
 		} as unknown as typeof event.locals.services;
@@ -117,12 +119,15 @@ describe('handleStremioStream', () => {
 		expect(getTorrentStreams).toHaveBeenCalledWith('tt0944947');
 		const body = await res.json();
 		expect(body.streams).toHaveLength(1);
+		expect(body.streams[0].sources).toEqual(['tracker:http://tracker.example/announce']);
+		// Internal trackers array is not leaked to the Stremio payload.
+		expect(body.streams[0].trackers).toBeUndefined();
 	});
 
 	it('prefers torrent titles that match the requested episode', async () => {
 		getTorrentStreams.mockResolvedValue([
-			{ infoHash: 'PACK', title: 'Show Complete' },
-			{ infoHash: 'EP', title: 'Show.S01E02.mkv' }
+			{ infoHash: 'PACK', title: 'Show Complete', trackers: [] },
+			{ infoHash: 'EP', title: 'Show.S01E02.mkv', trackers: [] }
 		]);
 		event.params = { name: 'tt0944947:1:2.json' };
 		const res = await handleStremioStream(event);
