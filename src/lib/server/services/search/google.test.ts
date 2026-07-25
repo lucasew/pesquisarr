@@ -13,10 +13,7 @@ describe('GoogleService SERP regex', () => {
 			<a href="https://google.com/path">noise</a>
 		`;
 		const urls = matchFirstGroup(html, service.regex);
-		expect(urls).toEqual([
-			'https://example.com/a.torrent',
-			'https%3A%2F%2Ftracker.example%2Fb'
-		]);
+		expect(urls).toEqual(['https://example.com/a.torrent', 'https%3A%2F%2Ftracker.example%2Fb']);
 	});
 
 	it('does not treat optional-backslash form as the intended pattern', () => {

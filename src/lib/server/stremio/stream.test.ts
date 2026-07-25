@@ -91,10 +91,7 @@ describe('preferEpisodeStreams', () => {
 			{ infoHash: 'X', title: 'Show.1x5.WEB' },
 			{ infoHash: 'Y', title: 'Show.S02E01' }
 		];
-		expect(preferEpisodeStreams(withUnpadded, 1, 5).map((s) => s.infoHash)).toEqual([
-			'X',
-			'Y'
-		]);
+		expect(preferEpisodeStreams(withUnpadded, 1, 5).map((s) => s.infoHash)).toEqual(['X', 'Y']);
 	});
 });
 

@@ -45,12 +45,7 @@ export function parseStremioVideoId(raw: string): StremioVideoId | null {
 	if (parts.length >= 3) {
 		const season = Number(parts[1]);
 		const episode = Number(parts[2]);
-		if (
-			Number.isInteger(season) &&
-			Number.isInteger(episode) &&
-			season >= 1 &&
-			episode >= 1
-		) {
+		if (Number.isInteger(season) && Number.isInteger(episode) && season >= 1 && episode >= 1) {
 			result.season = season;
 			result.episode = episode;
 		}

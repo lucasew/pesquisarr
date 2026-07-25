@@ -8,7 +8,9 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 
 const useNode = process.env.ASTRO_ADAPTER === 'node';
 const sentryDisabled = process.env.SENTRY_DISABLED === '1';
-const cfWorkersStub = fileURLToPath(new URL('./src/lib/server/cloudflare-workers-stub.ts', import.meta.url));
+const cfWorkersStub = fileURLToPath(
+	new URL('./src/lib/server/cloudflare-workers-stub.ts', import.meta.url)
+);
 
 // https://astro.build/config
 // Sentry: server-only via @sentry/astro (no @sentry/cloudflare — Astro integration covers Workers SSR).

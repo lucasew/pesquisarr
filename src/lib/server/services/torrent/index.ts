@@ -35,7 +35,10 @@ export function base32InfoHashToHex(base32: string): string | null {
 	// SHA-1 is 20 bytes; reject if we did not get exactly that
 	if (bytes.length !== 20) return null;
 
-	return bytes.map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+	return bytes
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('')
+		.toUpperCase();
 }
 
 /** Normalize btih to 40-char uppercase hex (accepts hex or Base32). */

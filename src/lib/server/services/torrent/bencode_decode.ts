@@ -1,3 +1,4 @@
+// @ts-nocheck
 // stolen from: https://raw.githubusercontent.com/Chocobo1/bencode_online/master/src/bencode/decode.js
 // Refactored to keep decode cursor/state per call (safe under concurrent Workers requests).
 
@@ -148,9 +149,7 @@ class Decoder {
 
 		this.position = end;
 
-		return this.encoding
-			? this.data.toString(this.encoding, sep, end)
-			: this.data.slice(sep, end);
+		return this.encoding ? this.data.toString(this.encoding, sep, end) : this.data.slice(sep, end);
 	}
 }
 

@@ -81,9 +81,7 @@ describe('ImdbService', () => {
 		});
 
 		it('is ok when a real title is returned', async () => {
-			mocks.http.getHtml.mockResolvedValue(
-				'<title>The Shawshank Redemption (1994) - IMDb</title>'
-			);
+			mocks.http.getHtml.mockResolvedValue('<title>The Shawshank Redemption (1994) - IMDb</title>');
 			const result = await service.healthCheck();
 			expect(result.ok).toBe(true);
 		});
