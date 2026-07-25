@@ -23,7 +23,8 @@ export default [
 		files: ['**/*.svelte', '**/*.ts', '**/*.astro'],
 		languageOptions: {
 			parserOptions: {
-				parser: tseslint.parser
+				parser: tseslint.parser,
+				extraFileExtensions: ['.svelte']
 			}
 		},
 		rules: {

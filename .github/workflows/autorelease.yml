@@ -52,7 +52,7 @@ jobs:
           git config user.email actions-bot@users.noreply.github.com
 
       - name: Install dependencies
-        run: bun install
+        run: npm ci
 
       - name: Create Pull Request if there is new stuff from updaters
         if: github.event_name != 'pull_request'

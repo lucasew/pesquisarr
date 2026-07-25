@@ -32,6 +32,7 @@
 		"svelte": "^5.53.6"
 	},
 	"devDependencies": {
+		"@astrojs/check": "^0.9.9",
 		"@cloudflare/workers-types": "^4.20260228.1",
 		"@eslint/js": "^9.39.3",
 		"@inlang/paraglide-js": "2.20.2",
@@ -42,9 +43,9 @@
 		"daisyui": "^5.5.19",
 		"eslint": "^9.39.3",
 		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-astro": "^3.0.1",
+		"eslint-plugin-astro": "^1.1.2",
 		"eslint-plugin-svelte": "^3.15.0",
-		"globals": "^17.3.0",
+		"globals": "^17.7.0",
 		"postcss": "^8.5.6",
 		"prettier": "^3.8.1",
 		"prettier-plugin-astro": "^0.14.1",
