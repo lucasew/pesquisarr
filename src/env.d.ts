@@ -1,11 +1,9 @@
 /// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
 
-import type { getServices } from './lib/server/services';
-
 declare namespace App {
 	interface Locals {
-		services: ReturnType<typeof getServices>;
+		services: ReturnType<typeof import('./lib/server/services').getServices>;
 		locale?: string;
 		/** Cloudflare execution context (Astro 6 @astrojs/cloudflare) */
 		cfContext?: ExecutionContext;
