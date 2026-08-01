@@ -32,7 +32,7 @@
 		"svelte": "^5.53.6"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260228.1",
+		"@cloudflare/workers-types": "^5.0.0",
 		"@eslint/js": "^9.39.3",
 		"@inlang/paraglide-js": "2.23.0",
 		"@types/he": "^1.2.3",
