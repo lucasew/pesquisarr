@@ -5,10 +5,8 @@
 	let isDark = $state(false);
 
 	onMount(() => {
-		// Check saved theme preference or default to light
-		const savedTheme = localStorage.getItem('theme') || 'light';
-		isDark = savedTheme === 'dark';
-		document.documentElement.setAttribute('data-theme', savedTheme);
+		const applied = document.documentElement.getAttribute('data-theme') || 'light';
+		isDark = applied === 'dark';
 	});
 
 	function toggleTheme() {
