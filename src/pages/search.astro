@@ -2,17 +2,16 @@
 import Layout from '../layouts/Layout.astro';
 import SearchBar from '../components/SearchBar.svelte';
 import TorrentCard from '../components/TorrentCard.svelte';
-import { buildMagnetLink } from '../lib/server/services/torrent';
+import { buildMagnetLink, type TorrentStream } from '../lib/server/services/torrent';
 
 const query = Astro.url.searchParams.get('query');
-let magnets: string[] = [];
+let streams: TorrentStream[] = [];
 
 if (query) {
 	const { services } = Astro.locals;
 	// Rank/scrape/dedupe lives on SearchService — same pipeline the page used to
 	// inline (and that ScraperService.getTorrentStreams still mirrors for IMDb).
-	const streams = await services.search.searchAndScrape(query);
-	magnets = streams.map((stream) => buildMagnetLink(stream));
+	streams = await services.search.searchAndScrape(query);
 }
 
 const pageTitle = query ? `${query} - pesquisarr` : 'pesquisarr';
@@ -26,8 +25,15 @@ const pageTitle = query ? `${query} - pesquisarr` : 'pesquisarr';
 
 		<div class="space-y-4">
 			{
-				magnets.length > 0 ? (
-					magnets.map((torrent) => <TorrentCard torrent={torrent} />)
+				streams.length > 0 ? (
+					streams.map((stream) => (
+						<TorrentCard
+							title={stream.title}
+							infoHash={stream.infoHash}
+							trackers={stream.trackers}
+							href={buildMagnetLink(stream)}
+						/>
+					))
 				) : query ? (
 					<div class="text-center py-10">
 						<p class="text-xl">Nenhum resultado encontrado para "{query}"</p>

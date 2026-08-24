@@ -1,19 +1,27 @@
 <script lang="ts">
 	import { Download } from 'lucide-svelte';
 
-	let { torrent }: { torrent: string } = $props();
-
-	const torrentURL = $derived(new URL(torrent));
+	let {
+		title,
+		infoHash,
+		trackers,
+		href
+	}: {
+		title: string;
+		infoHash: string;
+		trackers: string[];
+		href: string;
+	} = $props();
 </script>
 
 <div class="card bg-base-100 shadow-sm border border-base-content/10 mb-3">
 	<div class="card-body p-6">
 		<div class="flex items-center justify-between gap-2 mb-2">
 			<h2 class="card-title text-lg break-all">
-				{torrentURL.searchParams.get('dn') || '(NO NAME)'}
+				{title || '(NO NAME)'}
 			</h2>
 			<a
-				href={torrent}
+				{href}
 				target="_blank"
 				class="btn btn-ghost btn-circle"
 				aria-label="Download"
@@ -27,23 +35,21 @@
 			<div>
 				<h3 class="text-xs uppercase tracking-wider font-bold mb-1">Trackers</h3>
 				<ul class="list-none text-sm">
-					{#each [torrentURL.searchParams.getAll('tr')] as trackers, i (i)}
-						{#each trackers.slice(0, 3) as tracker (tracker)}
-							<li class="truncate">{tracker}</li>
-						{/each}
-						{#if trackers.length > 3}
-							<li class="text-xs italic">
-								... e mais {trackers.length - 3}
-							</li>
-						{/if}
+					{#each trackers.slice(0, 3) as tracker (tracker)}
+						<li class="truncate">{tracker}</li>
 					{/each}
+					{#if trackers.length > 3}
+						<li class="text-xs italic">
+							... e mais {trackers.length - 3}
+						</li>
+					{/if}
 				</ul>
 			</div>
 
 			<div>
 				<h3 class="text-xs uppercase tracking-wider font-bold mb-1">Infohash</h3>
 				<p class="text-sm font-mono break-all leading-none">
-					{torrentURL.searchParams.get('xt')?.replace('urn:', '').replace('btih:', '')}
+					{infoHash}
 				</p>
 			</div>
 		</div>
