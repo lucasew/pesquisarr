@@ -40,6 +40,29 @@ describe('HttpService', () => {
 			statusText: 'Not Found'
 		} as unknown as Response);
 
-		await expect(service.getHtml('https://example.com')).rejects.toThrow('Not Found');
+		await expect(service.getHtml('https://example.com')).rejects.toThrow(
+			'Failed to fetch HTML: Not Found'
+		);
+	});
+
+	it('should return the response body from getBuffer', async () => {
+		const body = new ArrayBuffer(4);
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			arrayBuffer: () => Promise.resolve(body)
+		} as unknown as Response);
+
+		await expect(service.getBuffer('https://example.com/file.torrent')).resolves.toBe(body);
+	});
+
+	it('should throw from getBuffer when the response is not ok', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: false,
+			statusText: 'Forbidden'
+		} as unknown as Response);
+
+		await expect(service.getBuffer('https://example.com/file.torrent')).rejects.toThrow(
+			'Failed to fetch Buffer: Forbidden'
+		);
 	});
 });

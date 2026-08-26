@@ -57,15 +57,25 @@ export default class HttpService extends BaseService {
 		});
 	}
 
+	private async fetchOk(
+		url: string,
+		ttl: number,
+		extraHeaders: Record<string, string>,
+		kind: 'HTML' | 'Buffer'
+	): Promise<Response> {
+		const response = await this.fetch(url, ttl, extraHeaders);
+		if (!response.ok) {
+			throw new Error(`Failed to fetch ${kind}: ${response.statusText}`);
+		}
+		return response;
+	}
+
 	async getHtml(
 		url: string,
 		ttl = 3600,
 		extraHeaders: Record<string, string> = {}
 	): Promise<string> {
-		const response = await this.fetch(url, ttl, extraHeaders);
-		if (!response.ok) {
-			throw new Error(`Failed to fetch HTML: ${response.statusText}`);
-		}
+		const response = await this.fetchOk(url, ttl, extraHeaders, 'HTML');
 		return response.text();
 	}
 
@@ -74,10 +84,7 @@ export default class HttpService extends BaseService {
 		ttl = 3600,
 		extraHeaders: Record<string, string> = {}
 	): Promise<ArrayBuffer> {
-		const response = await this.fetch(url, ttl, extraHeaders);
-		if (!response.ok) {
-			throw new Error(`Failed to fetch Buffer: ${response.statusText}`);
-		}
+		const response = await this.fetchOk(url, ttl, extraHeaders, 'Buffer');
 		return response.arrayBuffer();
 	}
 }
