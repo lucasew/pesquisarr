@@ -2,7 +2,7 @@
 _.path = ["./node_modules/.bin"]
 
 [tools]
-node = "26.3.0"
+node = "26.8.1"
 
 [hooks.postinstall]
 script = "npm install"
