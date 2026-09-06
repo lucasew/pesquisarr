@@ -16,7 +16,7 @@
 		"preview:cf": "wrangler dev"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^13.7.0",
+		"@astrojs/cloudflare": "^14.0.0",
 		"@astrojs/node": "^10.1.4",
 		"@astrojs/svelte": "^8.1.2",
 		"@sentry/astro": "^10.59.0",
