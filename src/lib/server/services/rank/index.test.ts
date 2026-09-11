@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import RankService, { buildIgnoredDomainRegex, escapeRegExp } from './index';
+import RankService, {
+	buildIgnoredDomainRegex,
+	escapeRegExp,
+	hasFreeKeyword
+} from './index';
 import { createMockEvent } from '../test-utils';
 
 describe('escapeRegExp / buildIgnoredDomainRegex', () => {
@@ -20,6 +24,17 @@ describe('escapeRegExp / buildIgnoredDomainRegex', () => {
 		expect(re.test('https://someproxy.example/p')).toBe(true);
 		expect(re.test('https://example.com/vpn-guide')).toBe(true);
 		expect(re.test('https://legit-torrent.example/movie')).toBe(false);
+	});
+});
+
+describe('hasFreeKeyword', () => {
+	it('matches free as a path/token, not as a substring of other words', () => {
+		expect(hasFreeKeyword('https://example.com/Free-Download/x')).toBe(true);
+		expect(hasFreeKeyword('https://example.com/free/movie')).toBe(true);
+		expect(hasFreeKeyword('https://example.com/get_free_movies')).toBe(true);
+		expect(hasFreeKeyword('https://example.com/freedom-movie')).toBe(false);
+		expect(hasFreeKeyword('https://example.com/freebsd-iso')).toBe(false);
+		expect(hasFreeKeyword('https://example.com/freefall')).toBe(false);
 	});
 });
 
@@ -68,5 +83,20 @@ describe('RankService', () => {
 		const freeIdx = result.indexOf('https://example.com/Free-Download/Movie');
 		const plainIdx = result.indexOf('https://example.com/Movie');
 		expect(freeIdx).toBeGreaterThan(plainIdx);
+	});
+
+	it('does not penalize free as a substring of other words', () => {
+		// Regression: includes('free') ranked freedom/freebsd below plain paths.
+		const links = [
+			'https://example.com/freedom-movie',
+			'https://example.com/freebsd-iso',
+			'https://example.com/Free-Download/spam'
+		];
+		const result = service.rank(links);
+		const freeSpam = result.indexOf('https://example.com/Free-Download/spam');
+		const freedom = result.indexOf('https://example.com/freedom-movie');
+		const freebsd = result.indexOf('https://example.com/freebsd-iso');
+		expect(freeSpam).toBeGreaterThan(freedom);
+		expect(freeSpam).toBeGreaterThan(freebsd);
 	});
 });
