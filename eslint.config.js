@@ -35,7 +35,6 @@ export default [
 			'.github',
 			'patches',
 			'project.inlang',
-			'static',
 			'public',
 			'build',
 			'dist',
