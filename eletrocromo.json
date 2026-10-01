@@ -1,0 +1,9 @@
+{
+	"schema_version": 1,
+	"package_id": "br.tec.lew.pesquisarr",
+	"app_name": "Pesquisarr",
+	"version_name": "0.14.0",
+	"go_main": "cmd/pesquisarr",
+	"icon": "public/logo.png",
+	"abis": ["arm64-v8a"]
+}
