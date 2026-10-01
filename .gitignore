@@ -19,3 +19,6 @@ bun.lockb
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Assembled Cloudflare worker before orvalho bundling
+/cmd/pesquisarr/worker

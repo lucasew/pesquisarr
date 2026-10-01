@@ -15,3 +15,30 @@ run = "npm run lint"
 
 [tasks.ci]
 depends = ["lint"]
+
+[tasks.embed]
+description = "Astro Cloudflare build bundled into cmd/pesquisarr/embed for orvalho"
+run = """
+set -euo pipefail
+SENTRY_DISABLED=1 npm run build
+rm -rf cmd/pesquisarr/worker
+mkdir -p cmd/pesquisarr/worker/assets
+if [ ! -d dist/server ]; then
+  echo "missing dist/server" >&2
+  exit 1
+fi
+cp -a dist/server/. cmd/pesquisarr/worker/
+if [ -d dist/client ]; then
+  cp -a dist/client/. cmd/pesquisarr/worker/assets/
+fi
+if [ ! -f cmd/pesquisarr/worker/entry.mjs ]; then
+  echo "missing cmd/pesquisarr/worker/entry.mjs" >&2
+  exit 1
+fi
+mise exec go@1.27.1 -- go run ./cmd/pesquisarr/genbundle
+"""
+
+[tasks.app]
+description = "Rebuild the embed, then lewkit release run"
+depends = ["embed"]
+run = "lewkit release run --config eletrocromo.json"

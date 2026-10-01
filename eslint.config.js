@@ -40,7 +40,9 @@ export default [
 			'build',
 			'dist',
 			'.astro',
-			'src/lib/paraglide/'
+			'src/lib/paraglide/',
+			'cmd/pesquisarr/embed',
+			'cmd/pesquisarr/worker'
 		]
 	}
 ];
