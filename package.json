@@ -17,7 +17,7 @@
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.7.0",
-		"@astrojs/node": "^10.1.4",
+		"@astrojs/node": "^11.0.0",
 		"@astrojs/svelte": "^8.1.2",
 		"@sentry/astro": "^10.59.0",
 		"@sentry/cloudflare": "^10.59.0",
