@@ -1,4 +1,4 @@
-FROM node:lts-alpine@sha256:931d7d57f8c1fd0e2179dbff7cc7da4c9dd100998bc2b32afc85142d8efbc213 AS builder
+FROM node:lts-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY project.inlang ./project.inlang
@@ -7,7 +7,7 @@ COPY . .
 ENV ASTRO_ADAPTER=node
 RUN npx astro telemetry disable && npm run build
 
-FROM node:lts-alpine@sha256:931d7d57f8c1fd0e2179dbff7cc7da4c9dd100998bc2b32afc85142d8efbc213
+FROM node:lts-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
 RUN apk add curl
 WORKDIR /app
 COPY --from=builder /app/dist dist/
