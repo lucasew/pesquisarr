@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.7.0",
 		"@astrojs/node": "^10.1.4",
-		"@astrojs/svelte": "^8.1.2",
+		"@astrojs/svelte": "^9.0.0",
 		"@sentry/astro": "^10.59.0",
 		"@sentry/cloudflare": "^10.59.0",
 		"@tailwindcss/postcss": "^4.2.1",
