@@ -23,7 +23,7 @@
 		"@sentry/cloudflare": "^10.59.0",
 		"@tailwindcss/postcss": "^4.2.1",
 		"@types/dompurify": "^3.2.0",
-		"astro": "^6.4.8",
+		"astro": "^7.0.0",
 		"dompurify": "^3.3.1",
 		"he": "^1.2.0",
 		"linkedom": "^0.18.12",
