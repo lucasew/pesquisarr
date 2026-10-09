@@ -66,8 +66,12 @@ github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3 h1:LMLX+LgTNWpfvCBdFe
 github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3/go.mod h1:jl5iWTm0/hd5PjEYEOuwAJ57L/CibdZfrqZ5XA5GrCk=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/jezek/xgb v1.3.1 h1:NQCAEfQyzN+3RjWUSHBuVIxQcy2YfG3/mNvKfs/0rEg=
+github.com/jezek/xgb v1.3.1/go.mod h1:nrhwO0FX/enq75I7Y7G8iN1ubpSGZEiA3v9e9GyRFlk=
 github.com/lewtec/lewkit v0.0.0-20261001180931-70a0a0b19549 h1:CFdJTupSAUhTTbLhR7ocG0F5FBGqRqstoAwudp+6G/M=
 github.com/lewtec/lewkit v0.0.0-20261001180931-70a0a0b19549/go.mod h1:SuPHu5Hj55rdx24TlheHJKCwf5VleEcMVt+QxXpkiIY=
+github.com/lewtec/lewkit v0.0.0-20261008124047-d76c404abf6f h1:Ol+nvQgx8rEvo1l13OHOScC/dHu7wWb7nMJpVk16onY=
+github.com/lewtec/lewkit v0.0.0-20261008124047-d76c404abf6f/go.mod h1:roXQhPBwldNmQ48hUGvINAmuHPlt3l+aP9R3MMoyZt0=
 github.com/lucasb-eyer/go-colorful v1.4.0 h1:UtrWVfLdarDgc44HcS7pYloGHJUjHV/4FwW4TvVgFr4=
 github.com/lucasb-eyer/go-colorful v1.4.0/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/lucasew/orvalho v0.0.0-20260920134237-d61ba6ce2eb5 h1:8qp/pG6jc8Rl72pkgFtah5jpFEnE8oRGRmZ6Isy/KbI=

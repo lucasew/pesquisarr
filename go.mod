@@ -3,7 +3,7 @@ module github.com/lucasew/cf-torrent
 go 1.27.1
 
 require (
-	github.com/lewtec/lewkit v0.0.0-20261001180931-70a0a0b19549
+	github.com/lewtec/lewkit v0.0.0-20261008124047-d76c404abf6f
 	github.com/lucasew/orvalho v0.0.0-20260920134237-d61ba6ce2eb5
 	github.com/stretchr/testify v1.12.1
 )
@@ -33,6 +33,7 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/google/pprof v0.0.0-20260802141513-ef3492d7dac3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/jezek/xgb v1.3.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.30 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
