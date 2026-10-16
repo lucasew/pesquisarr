@@ -1,4 +1,5 @@
 import BaseService from '../base';
+import { isExpectedUpstreamFailure } from '../http';
 import type { TorrentStream } from '../torrent';
 import type { SearchResult } from './base';
 
@@ -53,8 +54,16 @@ export default class SearchService extends BaseService {
 
 		const promises = engines.map((engine) => {
 			const serviceKey = ENGINE_KEYS[engine];
-			return this.services[serviceKey].search(searchTerms).catch((e) => {
-				this.services.error.report(e, { message: `${engine} search failed` });
+			return this.services[serviceKey].search(searchTerms).catch((e: unknown) => {
+				if (isExpectedUpstreamFailure(e)) {
+					this.services.error.warn(e, {
+						engine,
+						status: e.status,
+						message: `${engine} search unavailable`
+					});
+				} else {
+					this.services.error.report(e, { message: `${engine} search failed` });
+				}
 				return [] as SearchResult[];
 			});
 		});

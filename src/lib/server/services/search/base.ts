@@ -1,6 +1,15 @@
 import { isValidHttpUrl } from '$lib/url';
 import { matchFirstGroup } from '$lib/utils';
 import BaseService from '../base';
+import { isExpectedUpstreamFailure } from '../http';
+
+/** One quick retry — long enough to ride out a blip, short enough for a Worker request. */
+const UPSTREAM_ATTEMPTS = 2;
+const UPSTREAM_BACKOFF_MS = 200;
+
+function wait(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export type SearchResult = { link: string; source: string };
 
@@ -23,12 +32,26 @@ export default abstract class SearchBaseService extends BaseService {
 	abstract get regex(): RegExp;
 	abstract get sourceName(): string;
 
+	private async fetchHtml(query: string): Promise<string> {
+		const url = `${this.urlTemplate}${encodeURIComponent(query)}`;
+		let lastError: unknown;
+		for (let attempt = 1; attempt <= UPSTREAM_ATTEMPTS; attempt++) {
+			try {
+				return await this.services.http.getHtml(url, 3600);
+			} catch (error) {
+				lastError = error;
+				if (!isExpectedUpstreamFailure(error) || attempt === UPSTREAM_ATTEMPTS) {
+					throw error;
+				}
+				await wait(UPSTREAM_BACKOFF_MS * attempt);
+			}
+		}
+		throw lastError;
+	}
+
 	async search(query: string): Promise<SearchResult[]> {
 		try {
-			const responseText = await this.services.http.getHtml(
-				`${this.urlTemplate}${encodeURIComponent(query)}`,
-				3600
-			);
+			const responseText = await this.fetchHtml(query);
 			const urls = matchFirstGroup(responseText, this.regex);
 			const decodedUrls = [...new Set(urls)]
 				.map(safeDecodeURIComponent)
@@ -37,11 +60,20 @@ export default abstract class SearchBaseService extends BaseService {
 				.filter(isValidHttpUrl)
 				.map((url) => ({ link: url, source: this.sourceName }));
 		} catch (e) {
-			this.services.error.report(e, {
-				sourceName: this.sourceName,
-				query,
-				message: 'Search failed'
-			});
+			if (isExpectedUpstreamFailure(e)) {
+				this.services.error.warn(e, {
+					sourceName: this.sourceName,
+					query,
+					status: e.status,
+					message: 'Search source unavailable'
+				});
+			} else {
+				this.services.error.report(e, {
+					sourceName: this.sourceName,
+					query,
+					message: 'Search failed'
+				});
+			}
 			return [];
 		}
 	}
