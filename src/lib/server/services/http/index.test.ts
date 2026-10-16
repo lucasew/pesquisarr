@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import HttpService from './index';
+import HttpService, { HttpFetchError } from './index';
 import { createMockEvent } from '../test-utils';
 
 describe('HttpService', () => {
@@ -28,7 +28,11 @@ describe('HttpService', () => {
 					'Sec-Fetch-Dest': 'document'
 				}),
 				cf: expect.objectContaining({
-					cacheTtl: expect.any(Number)
+					cacheTtl: expect.any(Number),
+					cacheTtlByStatus: expect.objectContaining({
+						'400-499': 0,
+						'500-599': 0
+					})
 				})
 			})
 		);
@@ -37,12 +41,56 @@ describe('HttpService', () => {
 	it('should throw error if response is not ok', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: false,
+			status: 404,
 			statusText: 'Not Found'
 		} as unknown as Response);
 
-		await expect(service.getHtml('https://example.com')).rejects.toThrow(
-			'Failed to fetch HTML: Not Found'
-		);
+		await expect(service.getHtml('https://example.com')).rejects.toBeInstanceOf(HttpFetchError);
+		await expect(service.getHtml('https://example.com')).rejects.toMatchObject({
+			message: 'Failed to fetch HTML: Not Found',
+			status: 404,
+			transient: false
+		});
+	});
+
+	it('marks HTTP 429 as a transient HttpFetchError', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: false,
+			status: 429,
+			statusText: 'Too Many Requests'
+		} as unknown as Response);
+
+		await expect(service.getHtml('https://example.com')).rejects.toBeInstanceOf(HttpFetchError);
+		await expect(service.getHtml('https://example.com')).rejects.toMatchObject({
+			message: 'Failed to fetch HTML: Too Many Requests',
+			status: 429,
+			transient: true
+		});
+	});
+
+	it('wraps a dropped connection as a transient HttpFetchError', async () => {
+		vi.mocked(fetch).mockRejectedValue(new Error('Network connection lost.'));
+
+		await expect(service.getHtml('https://example.com')).rejects.toMatchObject({
+			name: 'HttpFetchError',
+			message: 'Failed to fetch HTML: Network connection lost.',
+			transient: true,
+			status: undefined
+		});
+	});
+
+	it('wraps a dropped connection while reading the body', async () => {
+		vi.mocked(fetch).mockResolvedValue({
+			ok: true,
+			status: 200,
+			text: () => Promise.reject(new Error('Network connection lost.'))
+		} as unknown as Response);
+
+		await expect(service.getHtml('https://example.com')).rejects.toMatchObject({
+			name: 'HttpFetchError',
+			message: 'Failed to fetch HTML: Network connection lost.',
+			transient: true
+		});
 	});
 
 	it('should return the response body from getBuffer', async () => {
@@ -58,11 +106,15 @@ describe('HttpService', () => {
 	it('should throw from getBuffer when the response is not ok', async () => {
 		vi.mocked(fetch).mockResolvedValue({
 			ok: false,
+			status: 403,
 			statusText: 'Forbidden'
 		} as unknown as Response);
 
-		await expect(service.getBuffer('https://example.com/file.torrent')).rejects.toThrow(
-			'Failed to fetch Buffer: Forbidden'
-		);
+		await expect(service.getBuffer('https://example.com/file.torrent')).rejects.toMatchObject({
+			name: 'HttpFetchError',
+			message: 'Failed to fetch Buffer: Forbidden',
+			status: 403,
+			transient: false
+		});
 	});
 });

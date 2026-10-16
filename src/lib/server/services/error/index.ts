@@ -24,6 +24,25 @@ export default class ErrorService extends BaseService {
 		}
 	}
 
+	/**
+	 * Expected upstream failure (rate limit, dropped connection).
+	 * Leaves a breadcrumb for the next real error and does not open a Sentry issue.
+	 */
+	warn(error: unknown, context: Record<string, unknown> = {}) {
+		const err = toError(error);
+		console.warn('Upstream failure:', err.message, 'Context:', context);
+		try {
+			Sentry.addBreadcrumb({
+				category: 'upstream',
+				level: 'warning',
+				message: err.message,
+				data: context
+			});
+		} catch (sentryError) {
+			console.error('Sentry.addBreadcrumb failed:', sentryError);
+		}
+	}
+
 	async healthCheck() {
 		const client = Sentry.getClient();
 		const enabled = Boolean(client?.getOptions()?.enabled);

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import type { AppEvent } from '../../app-event';
 import SearchService, { mergeStreamsByInfoHash, SOURCE_REFERERS } from './index';
+import { HttpFetchError } from '../http';
 import { createMockEvent } from '../test-utils';
 import type { TorrentStream } from '../torrent';
 
@@ -10,7 +11,7 @@ type MockServices = {
 	search_yandex: { search: Mock };
 	rank: { rank: Mock };
 	scraper: { fetchTorrentsInSite: Mock };
-	error: { report: Mock };
+	error: { report: Mock; warn: Mock };
 };
 
 describe('mergeStreamsByInfoHash', () => {
@@ -49,7 +50,7 @@ describe('SearchService.scrapeResults / searchAndScrape', () => {
 			search_yandex: { search: vi.fn().mockResolvedValue([]) },
 			rank: { rank: vi.fn((links: string[]) => links) },
 			scraper: { fetchTorrentsInSite: vi.fn().mockResolvedValue([]) },
-			error: { report: vi.fn() }
+			error: { report: vi.fn(), warn: vi.fn() }
 		};
 		mockEvent.locals.services = {
 			...((mockEvent.locals.services as object) ?? {}),
@@ -94,10 +95,7 @@ describe('SearchService.scrapeResults / searchAndScrape', () => {
 			SOURCE_REFERERS.Yandex
 		);
 		expect(streams).toHaveLength(1);
-		expect(streams[0].trackers).toEqual([
-			'http://a.example/announce',
-			'http://b.example/announce'
-		]);
+		expect(streams[0].trackers).toEqual(['http://a.example/announce', 'http://b.example/announce']);
 	});
 
 	it('searchAndScrape runs engines then scrapeResults', async () => {
@@ -116,5 +114,48 @@ describe('SearchService.scrapeResults / searchAndScrape', () => {
 		expect(mocks.search_google.search).toHaveBeenCalled();
 		expect(streams).toHaveLength(1);
 		expect(streams[0].infoHash).toBe('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
+	});
+
+	it('returns the other engines when one source is rate limited', async () => {
+		mocks.search_google.search.mockRejectedValue(
+			new HttpFetchError({
+				kind: 'HTML',
+				url: 'https://example.test/search?q=movie',
+				status: 429,
+				statusText: 'Too Many Requests'
+			})
+		);
+		mocks.search_duckduckgo.search.mockResolvedValue([
+			{ link: 'https://ddg.example/a', source: 'DuckDuckGo' }
+		]);
+		mocks.search_yandex.search.mockRejectedValue(
+			new HttpFetchError({
+				kind: 'HTML',
+				url: 'https://example.test/search?q=movie',
+				cause: new Error('Network connection lost.')
+			})
+		);
+
+		const results = await service.search('movie');
+
+		expect(results).toEqual([{ link: 'https://ddg.example/a', source: 'DuckDuckGo' }]);
+		expect(mocks.error.report).not.toHaveBeenCalled();
+		expect(mocks.error.warn).toHaveBeenCalledTimes(2);
+	});
+
+	it('reports an unexpected engine failure without dropping the others', async () => {
+		mocks.search_google.search.mockRejectedValue(new Error('result parse failed'));
+		mocks.search_duckduckgo.search.mockResolvedValue([
+			{ link: 'https://ddg.example/a', source: 'DuckDuckGo' }
+		]);
+
+		const results = await service.search('movie');
+
+		expect(results).toEqual([{ link: 'https://ddg.example/a', source: 'DuckDuckGo' }]);
+		expect(mocks.error.report).toHaveBeenCalledWith(
+			expect.any(Error),
+			expect.objectContaining({ message: 'google search failed' })
+		);
+		expect(mocks.error.warn).not.toHaveBeenCalled();
 	});
 });
