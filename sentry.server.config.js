@@ -6,10 +6,15 @@ import * as Sentry from '@sentry/astro';
 // don't 500 every route; pass SENTRY_DISABLED=1 yourself for any other local production build.
 const enabled = import.meta.env.PROD;
 
+// Workers resolve `@sentry/astro` to the browser SDK. Its default integrations
+// call addEventListener with useCapture, which workerd rejects and 500s the page.
+const inWorkerd = typeof WebSocketPair !== 'undefined';
+
 Sentry.init({
 	dsn: 'https://9de97d2619224108bd22d5b32502ca76@o4508616651505664.ingest.us.sentry.io/4510840434262016',
 	enabled,
 	// Request URLs/query strings may include search terms; keep PII off by default.
 	sendDefaultPii: false,
-	tracesSampleRate: enabled ? 0.2 : 0
+	tracesSampleRate: enabled ? 0.2 : 0,
+	...(inWorkerd ? { defaultIntegrations: false } : {})
 });
