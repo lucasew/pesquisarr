@@ -5,7 +5,7 @@ export function createMockEvent(): AppEvent {
 	return {
 		locals: {
 			services: {
-				error: { report: vi.fn() }
+				error: { report: vi.fn(), warn: vi.fn() }
 			}
 		} as unknown as App.Locals,
 		platform: {

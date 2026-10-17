@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import SearchBaseService, { safeDecodeURIComponent } from './base';
+import { HttpFetchError } from '../http';
 import { createMockEvent } from '../test-utils';
 import type { AppEvent } from '../../app-event';
 
@@ -38,11 +39,13 @@ describe('SearchBaseService.search', () => {
 	let mockEvent: AppEvent;
 	let getHtml: Mock;
 	let report: Mock;
+	let warn: Mock;
 
 	beforeEach(() => {
 		mockEvent = createMockEvent();
 		getHtml = vi.fn();
 		report = mockEvent.locals.services.error.report as Mock;
+		warn = mockEvent.locals.services.error.warn as Mock;
 		mockEvent.locals.services = {
 			...mockEvent.locals.services,
 			http: { getHtml, fetch: vi.fn(), getBuffer: vi.fn() }
@@ -90,5 +93,98 @@ describe('SearchBaseService.search', () => {
 			'https://other.example/ok',
 			'https://site.example/path/%ZZ'
 		]);
+	});
+
+	it('does not report a rate limit and returns no links from that source', async () => {
+		vi.useFakeTimers();
+		try {
+			getHtml.mockRejectedValue(
+				new HttpFetchError({
+					kind: 'HTML',
+					url: 'https://example-search.test/?q=movie',
+					status: 429,
+					statusText: 'Too Many Requests'
+				})
+			);
+
+			const pending = service.search('movie');
+			await vi.runAllTimersAsync();
+			const results = await pending;
+
+			expect(results).toEqual([]);
+			expect(getHtml).toHaveBeenCalledTimes(2);
+			expect(report).not.toHaveBeenCalled();
+			expect(warn).toHaveBeenCalledWith(
+				expect.objectContaining({ status: 429, transient: true }),
+				expect.objectContaining({
+					sourceName: 'TestEngine',
+					message: 'Search source unavailable',
+					status: 429
+				})
+			);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('retries a dropped connection once and keeps the recovered results', async () => {
+		vi.useFakeTimers();
+		try {
+			getHtml
+				.mockRejectedValueOnce(
+					new HttpFetchError({
+						kind: 'HTML',
+						url: 'https://example-search.test/?q=movie',
+						cause: new Error('Network connection lost.')
+					})
+				)
+				.mockResolvedValueOnce(`<a href="https://ok.example/a">a</a>`);
+
+			const pending = service.search('movie');
+			await vi.runAllTimersAsync();
+			const results = await pending;
+
+			expect(getHtml).toHaveBeenCalledTimes(2);
+			expect(results.map((r) => r.link)).toEqual(['https://ok.example/a']);
+			expect(report).not.toHaveBeenCalled();
+			expect(warn).not.toHaveBeenCalled();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('still reports unexpected search failures', async () => {
+		getHtml.mockRejectedValue(new TypeError('Cannot read properties of undefined'));
+
+		const results = await service.search('movie');
+
+		expect(results).toEqual([]);
+		expect(getHtml).toHaveBeenCalledTimes(1);
+		expect(warn).not.toHaveBeenCalled();
+		expect(report).toHaveBeenCalledWith(
+			expect.any(TypeError),
+			expect.objectContaining({
+				sourceName: 'TestEngine',
+				message: 'Search failed'
+			})
+		);
+	});
+
+	it('reports a non-transient HTTP failure without retrying', async () => {
+		getHtml.mockRejectedValue(
+			new HttpFetchError({
+				kind: 'HTML',
+				url: 'https://example-search.test/?q=movie',
+				status: 404,
+				statusText: 'Not Found'
+			})
+		);
+
+		const results = await service.search('movie');
+
+		expect(results).toEqual([]);
+		expect(getHtml).toHaveBeenCalledTimes(1);
+		expect(warn).not.toHaveBeenCalled();
+		expect(report).toHaveBeenCalled();
 	});
 });
