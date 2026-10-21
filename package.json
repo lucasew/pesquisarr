@@ -46,7 +46,7 @@
 		"globals": "^17.3.0",
 		"postcss": "^8.5.6",
 		"prettier": "^3.8.1",
-		"prettier-plugin-astro": "^0.14.1",
+		"prettier-plugin-astro": "^1.0.0",
 		"prettier-plugin-svelte": "^3.5.0",
 		"tailwindcss": "^4.2.1",
 		"typescript": "^5.9.3",
