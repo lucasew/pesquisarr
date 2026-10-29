@@ -61,4 +61,30 @@ describe('isValidHttpUrl', () => {
 		expect(isValidHttpUrl('http://[2001:db8::1]')).toBe(true);
 		expect(isValidHttpUrl('https://[2606:4700:4700::1111]')).toBe(true);
 	});
+
+	it('should return false for IPv4-mapped IPv6 that embeds private ranges', () => {
+		// Loopback / private / link-local / CGNAT via ::ffff:…
+		expect(isValidHttpUrl('http://[::ffff:127.0.0.1]')).toBe(false);
+		expect(isValidHttpUrl('http://[::ffff:7f00:1]')).toBe(false);
+		expect(isValidHttpUrl('http://[::ffff:10.0.0.1]')).toBe(false);
+		expect(isValidHttpUrl('http://[::ffff:192.168.1.1]')).toBe(false);
+		expect(isValidHttpUrl('http://[::ffff:169.254.169.254]')).toBe(false);
+		expect(isValidHttpUrl('http://[::ffff:100.64.0.1]')).toBe(false);
+		expect(isValidHttpUrl('http://[0:0:0:0:0:ffff:127.0.0.1]')).toBe(false);
+	});
+
+	it('should return true for IPv4-mapped IPv6 that embeds public IPv4', () => {
+		expect(isValidHttpUrl('http://[::ffff:8.8.8.8]')).toBe(true);
+		expect(isValidHttpUrl('http://[::ffff:808:808]')).toBe(true);
+	});
+
+	it('should return false for localhost with trailing FQDN dot', () => {
+		expect(isValidHttpUrl('http://localhost.')).toBe(false);
+		expect(isValidHttpUrl('http://LOCALHOST.')).toBe(false);
+	});
+
+	it('should return false for unspecified IPv6 address', () => {
+		expect(isValidHttpUrl('http://[::]')).toBe(false);
+		expect(isValidHttpUrl('http://[0::0]')).toBe(false);
+	});
 });
