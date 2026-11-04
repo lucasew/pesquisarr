@@ -135,4 +135,18 @@ describe('extractTrackers / buildMagnetLink / trackersFromTorrentMeta', () => {
 			})
 		).toEqual([SAMPLE_TRACKER, 'udp://tier1', 'http://tier2']);
 	});
+
+	it('skips blank and non-string tracker entries', () => {
+		expect(
+			trackersFromTorrentMeta({
+				announce: '  ',
+				'announce-list': [[null, SAMPLE_TRACKER], '', 42]
+			})
+		).toEqual([SAMPLE_TRACKER]);
+		expect(
+			extractTrackers(
+				`magnet:?xt=urn:btih:${SAMPLE_HEX}&tr=%20&tr=${encodeURIComponent(SAMPLE_TRACKER)}&tr=`
+			)
+		).toEqual([SAMPLE_TRACKER]);
+	});
 });
