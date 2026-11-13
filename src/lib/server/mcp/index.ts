@@ -1,3 +1,4 @@
+import { isValidHttpUrl } from '$lib/url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/sdk/validation/cfworker-provider.js';
@@ -71,8 +72,8 @@ export function createMcpServer(services: Services): McpServer {
 		{
 			jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
 			instructions:
-				'Search public torrent indexers and resolve IMDb ids to torrent streams. ' +
-				'Results include an infoHash, a display title, trackers, and a magnet URI.'
+				'Search public torrent indexers, resolve IMDb ids to torrent streams, and extract magnets ' +
+				'from a specific page URL. Results include an infoHash, a display title, trackers, and a magnet URI.'
 		}
 	);
 
@@ -156,6 +157,49 @@ export function createMcpServer(services: Services): McpServer {
 			} catch (e) {
 				services.error.report(e, { tool: 'get_torrent_streams', imdbId });
 				return errorResult(`Could not resolve torrent streams: ${errorMessage(e)}`);
+			}
+		}
+	);
+
+	server.registerTool(
+		'extract_magnets_from_url',
+		{
+			title: 'Extract magnets from a page URL',
+			description:
+				'Fetch one page without running JavaScript and return the magnet links it contains. ' +
+				'Accepts an indexer detail page or a direct .torrent URL. ' +
+				'Use it when you already have the link and do not want a web search.',
+			inputSchema: {
+				url: z.string().min(1).describe('Page or .torrent URL to scrape (http/https)'),
+				referer: z
+					.string()
+					.optional()
+					.describe('Optional Referer header for sites that block direct requests'),
+				limit: z
+					.number()
+					.int()
+					.min(1)
+					.max(MAX_LIMIT)
+					.optional()
+					.describe(`Maximum results to return (default ${DEFAULT_LIMIT}, max ${MAX_LIMIT})`)
+			}
+		},
+		async ({ url, referer, limit }) => {
+			if (!isValidHttpUrl(url)) {
+				return errorResult(`Invalid URL "${url}". Expected a public http or https URL.`);
+			}
+			try {
+				const streams = await services.scraper.fetchTorrentsInSite(url, referer);
+				const selected = limitStreams(streams, limit);
+				return textResult({
+					url,
+					total: streams.length,
+					returned: selected.length,
+					streams: selected.map(serializeStream)
+				});
+			} catch (e) {
+				services.error.report(e, { tool: 'extract_magnets_from_url', url });
+				return errorResult(`Could not extract magnets from ${url}: ${errorMessage(e)}`);
 			}
 		}
 	);
