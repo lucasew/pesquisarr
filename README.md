@@ -20,12 +20,13 @@ You only gets what really matters: the magnet links.
 
 `/api/mcp` speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stateless Streamable HTTP, so tools like Claude Code, Codex, or the MCP Inspector can search without going through the HTML UI.
 
-| Tool                  | What it does                                                             |
-| --------------------- | ------------------------------------------------------------------------ |
-| `search_torrents`     | Search indexers for a title/keyword and return torrents with magnet URIs |
-| `get_torrent_streams` | Resolve an IMDb id (`tt…`) to torrents; optional `season`/`episode`      |
-| `get_imdb_title`      | Fetch the display title for an IMDb id                                   |
-| `health_check`        | Report service health (`deep: true` probes upstreams)                    |
+| Tool                       | What it does                                                               |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `search_torrents`          | Search indexers for a title/keyword and return torrents with magnet URIs   |
+| `get_torrent_streams`      | Resolve an IMDb id (`tt…`) to torrents; optional `season`/`episode`        |
+| `extract_magnets_from_url` | Scrape one page (or `.torrent` URL) without JS and return its magnet links |
+| `get_imdb_title`           | Fetch the display title for an IMDb id                                     |
+| `health_check`             | Report service health (`deep: true` probes upstreams)                      |
 
 Each request builds a fresh server, so no session state survives between Worker isolates. Responses are plain JSON (no SSE) and CORS is open for browser clients.
 

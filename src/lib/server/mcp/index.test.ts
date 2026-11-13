@@ -14,7 +14,8 @@ function makeServices() {
 			searchAndScrape: vi.fn(async () => [sampleStream])
 		},
 		scraper: {
-			getTorrentStreams: vi.fn(async () => [sampleStream])
+			getTorrentStreams: vi.fn(async () => [sampleStream]),
+			fetchTorrentsInSite: vi.fn(async () => [sampleStream])
 		},
 		imdb: {
 			getTitleById: vi.fn(async () => 'The Shawshank Redemption')
@@ -86,6 +87,7 @@ describe('MCP server', () => {
 			expect.arrayContaining([
 				'search_torrents',
 				'get_torrent_streams',
+				'extract_magnets_from_url',
 				'get_imdb_title',
 				'health_check'
 			])
@@ -106,6 +108,40 @@ describe('MCP server', () => {
 		expect(payload.total).toBe(1);
 		expect(payload.streams[0].infoHash).toBe(sampleStream.infoHash);
 		expect(payload.streams[0].magnet).toContain('magnet:?xt=urn:btih:');
+	});
+
+	it('extracts magnets from a page URL without a search', async () => {
+		const services = makeServices();
+		const body = await rpc(services, {
+			jsonrpc: '2.0',
+			id: 4,
+			method: 'tools/call',
+			params: {
+				name: 'extract_magnets_from_url',
+				arguments: { url: 'https://indexer.example/torrent/abc', limit: 5 }
+			}
+		});
+
+		expect(services.scraper.fetchTorrentsInSite).toHaveBeenCalledWith(
+			'https://indexer.example/torrent/abc',
+			undefined
+		);
+		const payload = JSON.parse(body.result?.content?.[0]?.text ?? '{}');
+		expect(payload.total).toBe(1);
+		expect(payload.streams[0].magnet).toContain('magnet:?xt=urn:btih:');
+	});
+
+	it('rejects a non-public URL without fetching it', async () => {
+		const services = makeServices();
+		const body = await rpc(services, {
+			jsonrpc: '2.0',
+			id: 5,
+			method: 'tools/call',
+			params: { name: 'extract_magnets_from_url', arguments: { url: 'http://127.0.0.1/admin' } }
+		});
+
+		expect(body.result?.isError).toBe(true);
+		expect(services.scraper.fetchTorrentsInSite).not.toHaveBeenCalled();
 	});
 
 	it('rejects an invalid IMDb id without hitting the scraper', async () => {
