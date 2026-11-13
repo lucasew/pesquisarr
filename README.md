@@ -16,6 +16,28 @@ You only gets what really matters: the magnet links.
 
 **The search query is your responsibility**
 
+## MCP endpoint
+
+`/api/mcp` speaks the [Model Context Protocol](https://modelcontextprotocol.io) over stateless Streamable HTTP, so tools like Claude Code, Codex, or the MCP Inspector can search without going through the HTML UI.
+
+| Tool                  | What it does                                                             |
+| --------------------- | ------------------------------------------------------------------------ |
+| `search_torrents`     | Search indexers for a title/keyword and return torrents with magnet URIs |
+| `get_torrent_streams` | Resolve an IMDb id (`tt…`) to torrents; optional `season`/`episode`      |
+| `get_imdb_title`      | Fetch the display title for an IMDb id                                   |
+| `health_check`        | Report service health (`deep: true` probes upstreams)                    |
+
+Each request builds a fresh server, so no session state survives between Worker isolates. Responses are plain JSON (no SSE) and CORS is open for browser clients.
+
+Point an MCP client at `https://<worker-host>/api/mcp` (or `http://localhost:4321/api/mcp` while running `npm run dev`). A quick check:
+
+```bash
+curl -s http://localhost:4321/api/mcp \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
 ## Desktop window
 
 ```bash
