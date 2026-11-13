@@ -25,6 +25,7 @@
 ## Estrutura de Pastas
 
 - **src/lib/server/services**: Lógica de negócio e integrações (IMDb, busca, torrents).
+- **src/lib/server/mcp**: Servidor MCP (Streamable HTTP stateless) que expõe os serviços como ferramentas.
 - **src/lib/server/app-event.ts**: Contexto mínimo da requisição (`AppEvent`) passado aos serviços.
 - **src/lib/server/services/base**: Classe abstrata com getters para `services`, `env`, `locals` e `platform`.
 - **src/pages/api/stremio**: Endpoints de integração com o protocolo Stremio.

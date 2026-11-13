@@ -19,6 +19,8 @@
 		"@astrojs/cloudflare": "^13.7.0",
 		"@astrojs/node": "^10.1.4",
 		"@astrojs/svelte": "^8.1.2",
+		"@cfworker/json-schema": "^4.1.6",
+		"@modelcontextprotocol/sdk": "^1.32.2",
 		"@sentry/astro": "^10.66.0",
 		"@sentry/cloudflare": "^10.66.0",
 		"@tailwindcss/postcss": "^4.2.1",
@@ -29,7 +31,8 @@
 		"linkedom": "^0.18.12",
 		"lucide-svelte": "^0.562.0",
 		"patch-package": "^8.0.1",
-		"svelte": "^5.53.6"
+		"svelte": "^5.53.6",
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^5.0.0",
