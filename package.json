@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.7.0",
 		"@astrojs/node": "^10.1.4",
-		"@astrojs/svelte": "^8.1.2",
+		"@astrojs/svelte": "^9.0.0",
 		"@cfworker/json-schema": "^4.1.6",
 		"@modelcontextprotocol/sdk": "^1.32.2",
 		"@sentry/astro": "^10.66.0",
