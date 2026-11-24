@@ -1,13 +1,19 @@
 import BaseService from '../base';
 import data from './data.json';
 
+/** True when `free` appears as its own token (not inside freedom/freebsd/…). */
+export function hasFreeKeyword(link: string): boolean {
+	// Token edges: start/end or non-alphanumeric so Free-Download /free/ still match.
+	return /(^|[^a-z0-9])free([^a-z0-9]|$)/i.test(link);
+}
+
 function rankScore(link: string): [number, number, number] {
-	// Prefer "torrent" in URL, penalize "free", then longer URLs as tiebreaker.
+	// Prefer "torrent" in URL, penalize token "free", then longer URLs as tiebreaker.
 	// Compare lowercased so e.g. `/Torrent/` and `/Free-Download` score like their
 	// lowercase counterparts (path casing varies a lot across indexers).
 	const lower = link.toLowerCase();
 	const torrent = lower.includes('torrent') ? 0 : 1;
-	const free = lower.includes('free') ? 1 : 0;
+	const free = hasFreeKeyword(lower) ? 1 : 0;
 	const lengthPenalty = -link.length;
 	return [torrent, free, lengthPenalty];
 }
