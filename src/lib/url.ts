@@ -1,4 +1,20 @@
 /**
+ * Expand an IPv4-mapped IPv6 suffix (`127.0.0.1` or hextet form `7f00:1`) to dotted IPv4.
+ * Returns null if the suffix is not a recognizable embedded IPv4.
+ */
+function embeddedIpv4FromMapped(suffix: string): string | null {
+	if (/^\d{1,3}(\.\d{1,3}){3}$/.test(suffix)) {
+		return suffix;
+	}
+	// WHATWG URL normalizes ::ffff:127.0.0.1 → ::ffff:7f00:1 (two hextets)
+	const hextets = suffix.match(/^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i);
+	if (!hextets) return null;
+	const hi = parseInt(hextets[1], 16);
+	const lo = parseInt(hextets[2], 16);
+	return `${(hi >> 8) & 0xff}.${hi & 0xff}.${(lo >> 8) & 0xff}.${lo & 0xff}`;
+}
+
+/**
  * Checks if a given string is a valid and safe HTTP/HTTPS URL.
  * @param url The URL string to validate.
  * @returns `true` if the URL is valid and safe, `false` otherwise.
@@ -13,9 +29,24 @@ export function isValidHttpUrl(url: string): boolean {
 		}
 
 		// 2. Prevent requests to internal or reserved IP addresses
-		const hostname = parsedUrl.hostname.replace(/[[\]]/g, '');
+		// Strip IPv6 brackets and trailing FQDN dots (localhost. → localhost)
+		let hostname = parsedUrl.hostname.replace(/[[\]]/g, '').replace(/\.+$/, '').toLowerCase();
 
-		if (hostname.toLowerCase() === 'localhost' || hostname === '0' || hostname === '0.0.0.0') {
+		// IPv4-mapped IPv6 embeds an IPv4 in the last 32 bits (SSRF bypass if ignored).
+		// WHATWG URL normalizes e.g. [::ffff:127.0.0.1] → ::ffff:7f00:1.
+		const v4Mapped = hostname.match(/^::ffff:(.+)$/i);
+		if (v4Mapped) {
+			const embedded = embeddedIpv4FromMapped(v4Mapped[1]);
+			if (!embedded) return false;
+			hostname = embedded;
+		}
+
+		if (hostname === 'localhost' || hostname === '0' || hostname === '0.0.0.0') {
+			return false;
+		}
+
+		// Unspecified addresses (often treated like local/any)
+		if (hostname === '::' || hostname === '0:0:0:0:0:0:0:0') {
 			return false;
 		}
 
