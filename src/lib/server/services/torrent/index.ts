@@ -37,7 +37,10 @@ export function base32InfoHashToHex(base32: string): string | null {
 	// SHA-1 is 20 bytes; reject if we did not get exactly that
 	if (bytes.length !== 20) return null;
 
-	return bytes.map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+	return bytes
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('')
+		.toUpperCase();
 }
 
 /** Normalize btih to 40-char uppercase hex (accepts hex or Base32). */
@@ -91,36 +94,38 @@ function extractDn(link: string): string {
 	}
 }
 
-/** Collect unique non-empty `tr=` tracker URLs from a magnet URI. */
-export function extractTrackers(link: string): string[] {
+/** Trim, drop empties/non-strings, and keep first occurrence. */
+function uniqueTrackers(values: Iterable<unknown>): string[] {
 	const seen = new Set<string>();
 	const out: string[] = [];
-
-	const push = (raw: string) => {
-		const tracker = raw.trim();
-		if (!tracker || seen.has(tracker)) return;
+	for (const value of values) {
+		if (typeof value !== 'string') continue;
+		const tracker = value.trim();
+		if (!tracker || seen.has(tracker)) continue;
 		seen.add(tracker);
 		out.push(tracker);
-	};
+	}
+	return out;
+}
 
+/** Collect unique non-empty `tr=` tracker URLs from a magnet URI. */
+export function extractTrackers(link: string): string[] {
 	try {
 		const parsedURL = new URL(link);
-		for (const tr of parsedURL.searchParams.getAll('tr')) {
-			push(tr);
-		}
-		return out;
+		return uniqueTrackers(parsedURL.searchParams.getAll('tr'));
 	} catch {
 		// Fallback when URL() rejects the magnet (malformed but still scrapable).
+		const raw: string[] = [];
 		const re = /[?&]tr=([^&]*)/gi;
 		let m: RegExpExecArray | null;
 		while ((m = re.exec(link)) !== null) {
 			try {
-				push(decodeURIComponent(m[1]));
+				raw.push(decodeURIComponent(m[1]));
 			} catch {
-				push(m[1]);
+				raw.push(m[1]);
 			}
 		}
-		return out;
+		return uniqueTrackers(raw);
 	}
 }
 
@@ -132,35 +137,24 @@ export function trackersFromTorrentMeta(meta: {
 	announce?: unknown;
 	'announce-list'?: unknown;
 }): string[] {
-	const seen = new Set<string>();
-	const out: string[] = [];
-
-	const push = (value: unknown) => {
-		if (typeof value !== 'string') return;
-		const tracker = value.trim();
-		if (!tracker || seen.has(tracker)) return;
-		seen.add(tracker);
-		out.push(tracker);
-	};
-
-	push(meta.announce);
-
+	const values: unknown[] = [meta.announce];
 	const list = meta['announce-list'];
 	if (Array.isArray(list)) {
 		for (const tier of list) {
 			if (Array.isArray(tier)) {
-				for (const entry of tier) push(entry);
+				values.push(...tier);
 			} else {
-				push(tier);
+				values.push(tier);
 			}
 		}
 	}
-
-	return out;
+	return uniqueTrackers(values);
 }
 
 /** Rebuild a magnet from a parsed stream (infohash, display name, trackers). */
-export function buildMagnetLink(stream: Pick<TorrentStream, 'infoHash' | 'title' | 'trackers'>): string {
+export function buildMagnetLink(
+	stream: Pick<TorrentStream, 'infoHash' | 'title' | 'trackers'>
+): string {
 	let magnet = `magnet:?xt=urn:btih:${stream.infoHash}`;
 	if (stream.title) {
 		magnet += `&dn=${encodeURIComponent(stream.title)}`;
