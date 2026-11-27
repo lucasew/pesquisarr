@@ -4,7 +4,7 @@ go 1.27.1
 
 require (
 	github.com/lewtec/lewkit v0.0.0-20261124190124-d44587ca3404
-	github.com/lucasew/orvalho v0.0.0-20260920134237-d61ba6ce2eb5
+	github.com/lucasew/orvalho v0.0.0-20261126183652-0e4d5b5a22a2
 	github.com/stretchr/testify v1.12.1
 )
 
